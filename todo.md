@@ -4,4 +4,4 @@
 
 - [x] FrontController servlet
   - [x] processRequest method
-- [ ] Jar creation script
+- [x] Jar creation script
