@@ -9,4 +9,6 @@
 ## Sprint 1 (List of controllers)
 
 - [x] Controller annotation
-- [ ] Scan the package specified by the user to get the list of controllers
+- [x] Scan the package specified by the user to get the list of controllers
+- [ ] Display the list of controller for all url
+- [ ] Tell the user how to specify the package to scan in web xml
