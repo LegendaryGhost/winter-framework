@@ -57,6 +57,11 @@ public class FrontController extends HttpServlet {
         if (queryString != null) {
             requestURL.append("?").append(queryString);
         }
-        out.println("Request URL: " + requestURL.toString());
+        out.println("<h1>Request URL: " + requestURL.toString() + "</h1>");
+        out.println("<ul>");
+        for (Class<?> controllerClass : controllers) {
+            out.println("<li>" + controllerClass.getName() + "</li>");
+        }
+        out.println("</ul>");
     }
 }

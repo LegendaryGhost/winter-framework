@@ -10,5 +10,5 @@
 
 - [x] Controller annotation
 - [x] Scan the package specified by the user to get the list of controllers
-- [ ] Display the list of controller for all url
+- [x] Display the list of controller for all url
 - [ ] Tell the user how to specify the package to scan in web xml
