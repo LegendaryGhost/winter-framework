@@ -44,6 +44,13 @@ public class FrontController extends HttpServlet {
             requestURL.append("?").append(queryString);
         }
         out.println("<h1>Request URL: " + requestURL.toString() + "</h1>");
+
+        // Get the part of the URL after the base URL of the webapp
+        String requestURI = req.getRequestURI();
+        String contextPath = req.getContextPath();
+        String pathAfterBaseURL = requestURI.substring(contextPath.length());
+        out.println("<h1>Path after base URL: " + pathAfterBaseURL + "</h1>");
+
         out.println("<h1>Controllers package: " + this.getInitParameter("controllers_package") + "</h1>");
         out.println("<ul>");
         for (Class<?> controllerClass : controllers) {
