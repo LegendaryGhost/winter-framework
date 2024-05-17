@@ -5,3 +5,10 @@
 - [x] FrontController servlet
   - [x] processRequest method
 - [x] Jar creation script
+
+## Sprint 1 (List of controllers)
+
+- [x] Controller annotation
+- [x] Scan the package specified by the user to get the list of controllers
+- [x] Display the list of controller for all url
+- [ ] Tell the user how to specify the package to scan in web xml
