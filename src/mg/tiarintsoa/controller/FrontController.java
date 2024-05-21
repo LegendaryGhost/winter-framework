@@ -27,7 +27,14 @@ public class FrontController extends HttpServlet {
                 for (Method method: controller.getDeclaredMethods()) {
                     if (method.isAnnotationPresent(GetMapping.class)) {
                         GetMapping getMapping = method.getAnnotation(GetMapping.class);
-                        urlMappings.put(getMapping.value(), new Mapping(controller, method));
+                        String url = getMapping.value();
+
+                        // Check if the URL has already been mapped
+                        if (urlMappings.containsKey(url)) {
+                            throw new IllegalStateException("URL " + url + " has already been mapped to another controller's method.");
+                        }
+
+                        urlMappings.put(url, new Mapping(controller, method));
                     }
                 }
             }
