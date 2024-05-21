@@ -4,21 +4,33 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import mg.tiarintsoa.annotation.Controller;
+import mg.tiarintsoa.annotation.GetMapping;
 import mg.tiarintsoa.reflection.Reflect;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
 
 public class FrontController extends HttpServlet {
 
-    private List<Class<?>> controllers;
+    private final HashMap<String, Mapping> urlMappings = new HashMap<>();
 
     @Override
     public void init() {
         String controllersPackage = this.getInitParameter("controllers_package");
         try {
-            this.controllers = Reflect.getAnnotatedClasses(controllersPackage, Controller.class);
+            List<Class<?>> controllers = Reflect.getAnnotatedClasses(controllersPackage, Controller.class);
+
+            for (Class<?> controller: controllers) {
+                for (Method method: controller.getDeclaredMethods()) {
+                    if (method.isAnnotationPresent(GetMapping.class)) {
+                        GetMapping getMapping = method.getAnnotation(GetMapping.class);
+                        urlMappings.put(getMapping.value(), new Mapping(controller, method));
+                    }
+                }
+            }
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -36,26 +48,22 @@ public class FrontController extends HttpServlet {
 
     protected void processRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         PrintWriter out = resp.getWriter();
-        // Get the URL of the request
-        StringBuffer requestURL = req.getRequestURL();
-        // If there are query parameters, append them to the URL
-        String queryString = req.getQueryString();
-        if (queryString != null) {
-            requestURL.append("?").append(queryString);
-        }
-        out.println("<h1>Request URL: " + requestURL.toString() + "</h1>");
 
         // Get the part of the URL after the base URL of the webapp
         String requestURI = req.getRequestURI();
         String contextPath = req.getContextPath();
-        String pathAfterBaseURL = requestURI.substring(contextPath.length());
-        out.println("<h1>Path after base URL: " + pathAfterBaseURL + "</h1>");
+        String url = requestURI.substring(contextPath.length());
+        Mapping mapping = urlMappings.get(url);
 
-        out.println("<h1>Controllers package: " + this.getInitParameter("controllers_package") + "</h1>");
-        out.println("<ul>");
-        for (Class<?> controllerClass : controllers) {
-            out.println("<li>" + controllerClass.getName() + "</li>");
+        if (mapping == null) {
+            // Set the response status to 404 Not Found
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            out.println("<h1>404 Not Found</h1>");
+            out.println("<p>The requested URL " + url + " was not found on this server.</p>");
+        } else {
+            out.println("<h1>URL: " + url + "</h1>");
+            out.println("<p>Controller: " + mapping.getController().getName() + "</p>");
+            out.println("<p>Method: " + mapping.getMethod().getName() + "</p>");
         }
-        out.println("</ul>");
     }
 }
