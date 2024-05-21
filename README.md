@@ -2,7 +2,7 @@
 
 A personnal web MVC framework built with Java
 
-## Installation
+## I - Installation
 
 1 - Download the **winter-framework.jar** file and add it to the project libraries
 
@@ -39,3 +39,35 @@ scan for **Controllers**
 ```
 
 In the example above, the controllers_package init parameter is set to mg.winter.controller, which is the package that the winter-framework will scan for Controllers. You should replace this value with the package of your project that contains your Controllers.
+
+## II - Usage
+
+### 1) Controller and endpoint
+
+Make a class a **controller** by placing it in the **controllers' package** you specified above.
+Then annotate the class with the **@Controller** annotation.
+
+Create a GET endpoint by annotating a controller's method with the **@GetMapping** annotation.
+Its value will be the URL mapped to it.
+
+Here is an example:
+
+```java
+import mg.tiarintsoa.annotation.Controller;
+import mg.tiarintsoa.annotation.GetMapping;
+
+@Controller
+public class TestController {
+
+    @GetMapping("/")
+    public void endPoint() {}
+
+    @GetMapping("/end-point-2")
+    public void endPoint2() {}
+
+    public void notAnEndPoint() {}
+
+}
+```
+
+**Warning:** Don't assign a single URL to more than one method.
