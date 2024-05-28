@@ -9,6 +9,7 @@ import mg.tiarintsoa.reflection.Reflect;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +41,7 @@ public class FrontController extends HttpServlet {
             }
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -68,9 +70,15 @@ public class FrontController extends HttpServlet {
             out.println("<h1>404 Not Found</h1>");
             out.println("<p>The requested URL " + url + " was not found on this server.</p>");
         } else {
-            out.println("<h1>URL: " + url + "</h1>");
-            out.println("<p>Controller: " + mapping.getController().getName() + "</p>");
-            out.println("<p>Method: " + mapping.getMethod().getName() + "</p>");
+            try {
+                Method method = mapping.getMethod();
+                Object controllerInstance = mapping.getControllerInstance();
+                String responseBody = (String) method.invoke(controllerInstance);
+                out.println("<p>" + responseBody + "</p>");
+            } catch (IllegalAccessException | InvocationTargetException | InstantiationException | NoSuchMethodException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
         }
     }
 }

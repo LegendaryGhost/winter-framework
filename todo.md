@@ -19,4 +19,8 @@
 - [x] GetMapping annotation
 - [x] URL mapping to the controllers' methods
 - [x] URL not found exception
-- [ ] Avoid double url mapping (1 url mapped to multiple controllers' method)
+- [x] Avoid double url mapping (1 url mapped to multiple controllers' method)
+
+# Sprint 3 (Display of the controller's method return value)
+- [x] Controller instantiation (Singleton pattern)
+- [x] Method invocation
