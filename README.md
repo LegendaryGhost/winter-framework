@@ -48,7 +48,8 @@ Make a class a **controller** by placing it in the **controllers' package** you 
 Then annotate the class with the **@Controller** annotation.
 
 Create a GET endpoint by annotating a controller's method with the **@GetMapping** annotation.
-Its value will be the URL mapped to it.
+The value of the annotation will be the URL mapped to it.
+Each endpoint must return a String representing the response's body.
 
 Here is an example:
 
@@ -60,10 +61,14 @@ import mg.tiarintsoa.annotation.GetMapping;
 public class TestController {
 
     @GetMapping("/")
-    public void endPoint() {}
+    public String endPoint() {
+        return "End point 1";
+    }
 
     @GetMapping("/end-point-2")
-    public void endPoint2() {}
+    public String endPoint2() {
+        return "End point 2";
+    }
 
     public void notAnEndPoint() {}
 
