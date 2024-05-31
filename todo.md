@@ -24,3 +24,10 @@
 # Sprint 3 (Display of the controller's method return value)
 - [x] Controller instantiation (Singleton pattern)
 - [x] Method invocation
+
+# Sprint 4 (ModelView)
+- [ ] ModelView class
+  - [ ] String url
+  - [ ] HashMap<String, Object> data
+- [ ] Bind attributes to the request
+- [ ] Forward the request to the view
