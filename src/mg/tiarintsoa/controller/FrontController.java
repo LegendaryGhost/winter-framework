@@ -1,10 +1,13 @@
 package mg.tiarintsoa.controller;
 
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import mg.tiarintsoa.annotation.Controller;
 import mg.tiarintsoa.annotation.GetMapping;
+import mg.tiarintsoa.exception.UnsupportedReturnTypeException;
 import mg.tiarintsoa.reflection.Reflect;
 
 import java.io.IOException;
@@ -46,16 +49,16 @@ public class FrontController extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         processRequest(req, resp);
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         processRequest(req, resp);
     }
 
-    protected void processRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected void processRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         PrintWriter out = resp.getWriter();
 
         // Get the part of the URL after the base URL of the webapp
@@ -69,16 +72,34 @@ public class FrontController extends HttpServlet {
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             out.println("<h1>404 Not Found</h1>");
             out.println("<p>The requested URL " + url + " was not found on this server.</p>");
-        } else {
-            try {
-                Method method = mapping.getMethod();
-                Object controllerInstance = mapping.getControllerInstance();
-                String responseBody = (String) method.invoke(controllerInstance);
-                out.println("<p>" + responseBody + "</p>");
-            } catch (IllegalAccessException | InvocationTargetException | InstantiationException | NoSuchMethodException e) {
-                e.printStackTrace();
-                throw new RuntimeException(e);
+            return;
+        }
+
+        try {
+            Method method = mapping.getMethod();
+            Object controllerInstance = mapping.getControllerInstance();
+            Object responseObject = method.invoke(controllerInstance);
+            if (responseObject instanceof String responseString) {
+                out.println("<p>" + responseString + "</p>");
+            } else if (responseObject instanceof ModelView modelView) {
+                // Bind the attributes to the request
+                HashMap<String, Object> data = modelView.getData();
+                for (String key: data.keySet()) {
+                    req.setAttribute(key, data.get(key));
+                }
+
+                // Forward the request to the view
+                RequestDispatcher dispatcher = req.getRequestDispatcher(modelView.getUrl());
+                dispatcher.forward(req, resp);
+            } else {
+                throw new UnsupportedReturnTypeException("Unsupported controller's method return value: "
+                    + responseObject.getClass().getName()
+                    + " returned instead of String or ModelView."
+                );
             }
+        } catch (UnsupportedReturnTypeException | IllegalAccessException | InvocationTargetException | InstantiationException | NoSuchMethodException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 }

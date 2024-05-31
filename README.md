@@ -49,7 +49,9 @@ Then annotate the class with the **@Controller** annotation.
 
 Create a GET endpoint by annotating a controller's method with the **@GetMapping** annotation.
 The value of the annotation will be the URL mapped to it.
-Each endpoint must return a String representing the response's body.
+Each endpoint must return a String representing the response's body
+or a ModelView. The url in the ModelView represents the URL to the view and the data
+will be a HashMap of the attributes which will be bind to the request.
 
 Here is an example:
 
@@ -61,8 +63,10 @@ import mg.tiarintsoa.annotation.GetMapping;
 public class TestController {
 
     @GetMapping("/")
-    public String endPoint() {
-        return "End point 1";
+    public ModelView message() {
+        ModelView mw = new ModelView("message.jsp");
+        mw.addObject("message", "Hello world !");
+        return mw;
     }
 
     @GetMapping("/end-point-2")
@@ -75,4 +79,6 @@ public class TestController {
 }
 ```
 
-**Warning:** Don't assign a single URL to more than one method.
+**Warning:**
+- Don't assign a single URL to more than one method.
+- Controller's method should only return a String or a ModelView 
