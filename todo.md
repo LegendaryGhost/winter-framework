@@ -26,8 +26,8 @@
 - [x] Method invocation
 
 # Sprint 4 (ModelView)
-- [ ] ModelView class
-  - [ ] String url
-  - [ ] HashMap<String, Object> data
-- [ ] Bind attributes to the request
-- [ ] Forward the request to the view
+- [x] ModelView class
+  - [x] String url
+  - [x] HashMap<String, Object> data
+- [x] Bind attributes to the request
+- [x] Forward the request to the view
