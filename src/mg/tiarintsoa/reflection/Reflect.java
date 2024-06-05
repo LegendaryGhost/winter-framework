@@ -7,7 +7,6 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 
 public class Reflect {
@@ -15,18 +14,28 @@ public class Reflect {
     public static List<Class<?>> getAnnotatedClasses(String targetPackage, Class<? extends Annotation> targetAnnotation) throws IOException, ClassNotFoundException {
         List<Class<?>> classes = new ArrayList<>();
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        Enumeration<URL> resources = classLoader.getResources((targetPackage).replace(".", "/"));
-        if (resources == null) {
-            throw new IllegalArgumentException("Target package not found");
+        URL resource = classLoader.getResource((targetPackage).replace(".", "/"));
+
+        if (resource == null) {
+            throw new IOException("Target package not found: " + targetPackage);
         }
 
-        while (resources.hasMoreElements()) {
-            URL resource = resources.nextElement();
-            String filePath = resource.getFile();
-            String decodedPath = URLDecoder.decode(filePath, StandardCharsets.UTF_8);
-            File file = new File(decodedPath);
-            scanDirectory(classes, targetPackage, targetAnnotation, file);
+        String filePath = resource.getFile();
+        String decodedPath = URLDecoder.decode(filePath, StandardCharsets.UTF_8);
+        File file = new File(decodedPath);
+
+        if (!file.isDirectory()) {
+            throw new IOException("The target package cannot be a file: " + targetPackage);
         }
+
+        File[] files = file.listFiles();
+        assert files != null;
+        if (files.length == 0) {
+            throw new IOException("The target package is empty: " + targetPackage);
+        }
+
+        scanDirectory(classes, targetPackage, targetAnnotation, file);
+
         return classes;
     }
 

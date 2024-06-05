@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import mg.tiarintsoa.annotation.Controller;
 import mg.tiarintsoa.annotation.GetMapping;
-import mg.tiarintsoa.exception.UnsupportedReturnTypeException;
 import mg.tiarintsoa.reflection.Reflect;
 
 import java.io.IOException;
@@ -22,29 +21,57 @@ public class FrontController extends HttpServlet {
     private final HashMap<String, Mapping> urlMappings = new HashMap<>();
 
     @Override
-    public void init() {
-        String controllersPackage = this.getInitParameter("controllers_package");
-        try {
-            List<Class<?>> controllers = Reflect.getAnnotatedClasses(controllersPackage, Controller.class);
+    public void init() throws ServletException {
+        String controllersPackage = getInitParameter("controllers_package");
 
-            for (Class<?> controller: controllers) {
-                for (Method method: controller.getDeclaredMethods()) {
-                    if (method.isAnnotationPresent(GetMapping.class)) {
-                        GetMapping getMapping = method.getAnnotation(GetMapping.class);
-                        String url = getMapping.value();
+        if (controllersPackage == null || controllersPackage.isEmpty()) {
+            throw new ServletException("The controllers_package parameter is empty. Please check your web.xml file.");
+        }
 
-                        // Check if the URL has already been mapped
-                        if (urlMappings.containsKey(url)) {
-                            throw new IllegalStateException("URL " + url + " has already been mapped to another controller's method.");
-                        }
-
-                        urlMappings.put(url, new Mapping(controller, method));
-                    }
+        List<Class<?>> controllers = getAnnotatedControllers(controllersPackage);
+        for (Class<?> controller : controllers) {
+            for (Method method : controller.getDeclaredMethods()) {
+                if (isGetMappingMethod(method)) {
+                    String url = getGetMappingUrl(method);
+                    validateUrlUniqueness(url);
+                    validateMethodReturnType(method, controller);
+                    urlMappings.put(url, new Mapping(controller, method));
                 }
             }
+        }
+    }
+
+    private void validateMethodReturnType(Method method, Class<?> controller) throws ServletException {
+        if (!isValidReturnType(method)) {
+            throw new ServletException("Unsupported return type for method " + method.getName() + " in controller " + controller.getName());
+        }
+    }
+
+    private boolean isValidReturnType(Method method) {
+        Class<?> returnType = method.getReturnType();
+        return returnType.equals(String.class) || returnType.equals(ModelView.class);
+    }
+
+    private List<Class<?>> getAnnotatedControllers(String controllersPackage) throws ServletException {
+        try {
+            return Reflect.getAnnotatedClasses(controllersPackage, Controller.class);
         } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+            throw new ServletException(e);
+        }
+    }
+
+    private boolean isGetMappingMethod(Method method) {
+        return method.isAnnotationPresent(GetMapping.class);
+    }
+
+    private String getGetMappingUrl(Method method) {
+        GetMapping getMapping = method.getAnnotation(GetMapping.class);
+        return getMapping.value();
+    }
+
+    private void validateUrlUniqueness(String url) throws ServletException {
+        if (urlMappings.containsKey(url)) {
+            throw new ServletException("URL \"" + url + "\" has more than one mapping associated with it.");
         }
     }
 
@@ -68,11 +95,7 @@ public class FrontController extends HttpServlet {
         Mapping mapping = urlMappings.get(url);
 
         if (mapping == null) {
-            // Set the response status to 404 Not Found
-            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            out.println("<h1>404 Not Found</h1>");
-            out.println("<p>The requested URL " + url + " was not found on this server.</p>");
-            return;
+            throw new ServletException("The requested URL \"" + url + "\" was not found on this server.");
         }
 
         try {
@@ -91,15 +114,9 @@ public class FrontController extends HttpServlet {
                 // Forward the request to the view
                 RequestDispatcher dispatcher = req.getRequestDispatcher(modelView.getUrl());
                 dispatcher.forward(req, resp);
-            } else {
-                throw new UnsupportedReturnTypeException("Unsupported controller's method return value: "
-                    + responseObject.getClass().getName()
-                    + " returned instead of String or ModelView."
-                );
             }
-        } catch (UnsupportedReturnTypeException | IllegalAccessException | InvocationTargetException | InstantiationException | NoSuchMethodException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+        } catch (IllegalAccessException | InvocationTargetException | InstantiationException | NoSuchMethodException e) {
+            throw new ServletException(e);
         }
     }
 }

@@ -33,8 +33,8 @@
 - [x] Forward the request to the view
 
 ## Sprint 5 (Error handling)
-- [ ] Not existing controller package
-- [ ] Empty controller package
+- [x] Not existing controller package
+- [x] Empty controller package
 - [x] Similar URL mapping
 - [x] URL not found
 - [x] Unsupported controller's method return type
