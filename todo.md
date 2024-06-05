@@ -21,13 +21,20 @@
 - [x] URL not found exception
 - [x] Avoid double url mapping (1 url mapped to multiple controllers' method)
 
-# Sprint 3 (Display of the controller's method return value)
+## Sprint 3 (Display of the controller's method return value)
 - [x] Controller instantiation (Singleton pattern)
 - [x] Method invocation
 
-# Sprint 4 (ModelView)
+## Sprint 4 (ModelView)
 - [x] ModelView class
   - [x] String url
   - [x] HashMap<String, Object> data
 - [x] Bind attributes to the request
 - [x] Forward the request to the view
+
+## Sprint 5 (Error handling)
+- [x] Not existing controller package
+- [x] Empty controller package
+- [x] Similar URL mapping
+- [x] URL not found
+- [x] Unsupported controller's method return type
