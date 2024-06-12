@@ -1,8 +1,11 @@
 package mg.tiarintsoa.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 
 public class Mapping {
 
@@ -38,5 +41,19 @@ public class Mapping {
             controllerInstance = constructor.newInstance();
         }
         return controllerInstance;
+    }
+
+    public Object executeMethod(HttpServletRequest request) throws InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException {
+        Object controllerInstance = getControllerInstance();
+        Parameter[] parameters = method.getParameters();
+        Object[] parametersValues = new Object[parameters.length];
+
+        for (int i = 0; i < parameters.length; i++) {
+            String parameterName = parameters[i].getName();
+            Object parameterValue = request.getParameter(parameterName);
+            parametersValues[i] = parameterValue;
+        }
+
+        return method.invoke(controllerInstance, parametersValues);
     }
 }

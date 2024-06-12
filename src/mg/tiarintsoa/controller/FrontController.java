@@ -22,6 +22,10 @@ public class FrontController extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
+        scanControllersPackage();
+    }
+
+    private void scanControllersPackage() throws ServletException {
         String controllersPackage = getInitParameter("controllers_package");
 
         if (controllersPackage == null || controllersPackage.isEmpty()) {
@@ -100,9 +104,7 @@ public class FrontController extends HttpServlet {
         }
 
         try {
-            Method method = mapping.getMethod();
-            Object controllerInstance = mapping.getControllerInstance();
-            Object responseObject = method.invoke(controllerInstance);
+            Object responseObject = mapping.executeMethod(req);
             if (responseObject instanceof String responseString) {
                 out.println("<p>" + responseString + "</p>");
             } else if (responseObject instanceof ModelView modelView) {

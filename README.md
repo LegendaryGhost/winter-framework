@@ -40,9 +40,47 @@ scan for **Controllers**
 
 In the example above, the controllers_package init parameter is set to mg.winter.controller, which is the package that the winter-framework will scan for Controllers. You should replace this value with the package of your project that contains your Controllers.
 
+### Important note
+
+If you're manually compiling use your java files, please add the **-parameters** option in order
+to make the request parameters binding work :
+
+```shell
+javac -parameters -d <your_destination_folder> -cp <your_class_path> <your_java_file>
+```
+
+If you're using Maven, you can add the following configuration to your pom.xml file:
+
+```xml
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.8.0</version>
+            <configuration>
+                <compilerArgs>
+                    <arg>-parameters</arg>
+                </compilerArgs>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+```
+
+If you're using Gradle, you can add the following configuration to your build.gradle file:
+
+```groovy
+compileJava {
+    options.compilerArgs += ['-parameters']
+}
+```
+
 ## II - Usage
 
 ### 1) Controller and endpoint
+
+#### a) Controller and endpoint creation
 
 Make a class a **controller** by placing it in the **controllers' package** you specified above.
 Then annotate the class with the **@Controller** annotation.
@@ -82,3 +120,30 @@ public class TestController {
 **Warning:**
 - Don't assign a single URL to more than one method.
 - Controller's method should only return a String or a ModelView 
+
+#### Parameters binding
+
+You can bind the parameters of a request to the parameters of an endpoint by **convention**.
+You only have to give them the same name. Here is an example:
+
+**URL:** "/employee?firstname=John&lastname=Doe"
+
+**Controller**:
+
+```java
+import mg.tiarintsoa.annotation.Controller;
+import mg.tiarintsoa.annotation.GetMapping;
+
+@Controller
+public class TestController {
+
+    @GetMapping("/employee")
+    public ModelView employee(String firstname, String lastname) {
+        ModelView modelView = new ModelView("employee.jsp");
+        modelView.addObject("firstname", firstname);
+        modelView.addObject("lastname", lastname);
+        return modelView;
+    }
+
+}
+```
