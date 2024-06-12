@@ -22,6 +22,10 @@ public class FrontController extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
+        scanControllersPackage();
+    }
+
+    private void scanControllersPackage() throws ServletException {
         String controllersPackage = getInitParameter("controllers_package");
 
         if (controllersPackage == null || controllersPackage.isEmpty()) {
@@ -95,13 +99,12 @@ public class FrontController extends HttpServlet {
         Mapping mapping = urlMappings.get(url);
 
         if (mapping == null) {
-            throw new ServletException("The requested URL \"" + url + "\" was not found on this server.");
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "The requested URL \"" + url + "\" was not found on this server.");
+            return;
         }
 
         try {
-            Method method = mapping.getMethod();
-            Object controllerInstance = mapping.getControllerInstance();
-            Object responseObject = method.invoke(controllerInstance);
+            Object responseObject = mapping.executeMethod(req);
             if (responseObject instanceof String responseString) {
                 out.println("<p>" + responseString + "</p>");
             } else if (responseObject instanceof ModelView modelView) {

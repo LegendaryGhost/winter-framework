@@ -38,3 +38,9 @@
 - [x] Similar URL mapping
 - [x] URL not found
 - [x] Unsupported controller's method return type
+
+## Sprint 6 (Request parameter binding)
+- [x] Get the list of parameters for each mapping's method
+- [x] Get the names of the parameters
+- [x] Bind the method's parameters with the request's parameters by convention (bind them by their name)
+- [x] Bind the request's parameters using an annotation 
