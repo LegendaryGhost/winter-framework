@@ -95,7 +95,8 @@ public class FrontController extends HttpServlet {
         Mapping mapping = urlMappings.get(url);
 
         if (mapping == null) {
-            throw new ServletException("The requested URL \"" + url + "\" was not found on this server.");
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "The requested URL \"" + url + "\" was not found on this server.");
+            return;
         }
 
         try {
