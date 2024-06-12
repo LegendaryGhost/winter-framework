@@ -43,4 +43,4 @@
 - [x] Get the list of parameters for each mapping's method
 - [x] Get the names of the parameters
 - [x] Bind the method's parameters with the request's parameters by convention (bind them by their name)
-- [ ] Bind the request's parameters using an annotation 
+- [x] Bind the request's parameters using an annotation 

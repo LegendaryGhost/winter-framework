@@ -1,6 +1,7 @@
 package mg.tiarintsoa.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import mg.tiarintsoa.annotation.RequestParameter;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -43,15 +44,25 @@ public class Mapping {
         return controllerInstance;
     }
 
+    private String getParameterValue(HttpServletRequest request, Parameter parameter) {
+        String value = request.getParameter(parameter.getName());
+
+        if (value == null && parameter.isAnnotationPresent(RequestParameter.class)) {
+            RequestParameter requestParameter = parameter.getAnnotation(RequestParameter.class);
+            value = request.getParameter(requestParameter.value());
+        }
+
+        return value;
+    }
+
     public Object executeMethod(HttpServletRequest request) throws InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException {
         Object controllerInstance = getControllerInstance();
         Parameter[] parameters = method.getParameters();
         Object[] parametersValues = new Object[parameters.length];
 
         for (int i = 0; i < parameters.length; i++) {
-            String parameterName = parameters[i].getName();
-            Object parameterValue = request.getParameter(parameterName);
-            parametersValues[i] = parameterValue;
+            Parameter parameter = parameters[i];
+            parametersValues[i] = getParameterValue(request, parameter);
         }
 
         return method.invoke(controllerInstance, parametersValues);

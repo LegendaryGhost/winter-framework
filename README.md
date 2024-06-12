@@ -42,7 +42,7 @@ In the example above, the controllers_package init parameter is set to mg.winter
 
 ### Important note
 
-If you're manually compiling use your java files, please add the **-parameters** option in order
+If you're manually compiling your java files, please add the **-parameters** option in order
 to make the request parameters binding work :
 
 ```shell
@@ -96,6 +96,7 @@ Here is an example:
 ```java
 import mg.tiarintsoa.annotation.Controller;
 import mg.tiarintsoa.annotation.GetMapping;
+import mg.tiarintsoa.controller.ModelView;
 
 @Controller
 public class TestController {
@@ -133,6 +134,7 @@ You only have to give them the same name. Here is an example:
 ```java
 import mg.tiarintsoa.annotation.Controller;
 import mg.tiarintsoa.annotation.GetMapping;
+import mg.tiarintsoa.controller.ModelView;
 
 @Controller
 public class TestController {
@@ -147,3 +149,33 @@ public class TestController {
 
 }
 ```
+
+You can also bind the parameter using the **@RequestParameter** attribute.
+Its value will be the name of the request parameter that will be bind to it.
+
+**URL**: "/employee?name=John&lastname=Doe"
+
+**Controller:**
+```java
+import mg.tiarintsoa.annotation.Controller;
+import mg.tiarintsoa.annotation.GetMapping;
+import mg.tiarintsoa.annotation.RequestParameter;
+import mg.tiarintsoa.controller.ModelView;
+
+@Controller
+public class TestController {
+
+    @GetMapping("/employee")
+    public ModelView employee(@RequestParameter("name") String firstname, String lastname) {
+        ModelView modelView = new ModelView("employee.jsp");
+        modelView.addObject("firstname", firstname);
+        modelView.addObject("lastname", lastname);
+        return modelView;
+    }
+
+}
+```
+
+If the request contains both parameter's name and the annotation's value,
+the convention binding will be applied. In this case, if the URL looks like this :
+**"/employee?name=John&lastname=Doe&firstname=Alex"**, then the value of firstname will be **"Alex"**.
