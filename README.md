@@ -122,7 +122,7 @@ public class TestController {
 - Don't assign a single URL to more than one method.
 - Controller's method should only return a String or a ModelView 
 
-#### Parameters binding
+#### b) Parameters binding
 
 You can bind the parameters of a request to the parameters of an endpoint by **convention**.
 You only have to give them the same name. Here is an example:
@@ -130,7 +130,6 @@ You only have to give them the same name. Here is an example:
 **URL:** "/employee?firstname=John&lastname=Doe"
 
 **Controller**:
-
 ```java
 import mg.tiarintsoa.annotation.Controller;
 import mg.tiarintsoa.annotation.GetMapping;
@@ -176,6 +175,52 @@ public class TestController {
 }
 ```
 
-If the request contains both parameter's name and the annotation's value,
+Request parameters binding also works with objects.
+The objects' field value will be set based on their name and the field name following this pattern : **"\<parameterName>.\<fieldName>"**. 
+You can use both annotation and convention binding. Here is an example for more clarity:
+
+**URL**: "/employee?employee.firstname=John&employee.name=Doe"
+
+**Entity:**
+```java
+import mg.tiarintsoa.annotation.RequestSubParameter;
+
+public class Employee {
+    private String firstname;
+    @RequestSubParameter("name")
+    private String lastname;
+
+    public Employee() {}
+
+    // ...
+}
+```
+
+**Controller:**
+```java
+import mg.tiarintsoa.annotation.Controller;
+import mg.tiarintsoa.annotation.GetMapping;
+import mg.tiarintsoa.annotation.RequestParameter;
+import mg.tiarintsoa.controller.ModelView;
+import mg.winter.entity.Employee;
+
+@Controller
+public class TestController {
+
+    @GetMapping("/employee")
+    public ModelView employee(@RequestParameter("employee") Employee emp) {
+        ModelView modelView = new ModelView("employee.jsp");
+        modelView.addObject("emp", emp);
+        return modelView;
+    }
+
+}
+```
+
+**NB**:
+- Parameter binding only supports String or Object having String fields.
+- If the request contains both parameter's name and the annotation's value,
 the convention binding will be applied. In this case, if the URL looks like this :
-**"/employee?name=John&lastname=Doe&firstname=Alex"**, then the value of firstname will be **"Alex"**.
+**"/employee?name=John&firstname=Alex"**, then the value of the parameter named firstname will be **"Alex"**.
+- If none of the convention and annotation binding can be applied then the parameter will be set to null.
+- Objects' class must contain an **empty constructor**

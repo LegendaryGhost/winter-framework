@@ -49,4 +49,4 @@
 ## Sprint 7 (Request parameter binding for objects)
 - [x] Look for the object parameter's field name
 - [x] Get their value from the request
-- [ ] Create an annotation for the object parameter's fields
+- [x] Create an annotation for the object parameter's fields
