@@ -3,6 +3,8 @@ package mg.tiarintsoa.reflection;
 import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -10,6 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Reflect {
+
+    public static Object createInstance(Class<?> targetClass) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        Constructor<?> constructor = targetClass.getDeclaredConstructor();
+        return constructor.newInstance();
+    }
 
     public static List<Class<?>> getAnnotatedClasses(String targetPackage, Class<? extends Annotation> targetAnnotation) throws IOException, ClassNotFoundException {
         List<Class<?>> classes = new ArrayList<>();

@@ -44,3 +44,9 @@
 - [x] Get the names of the parameters
 - [x] Bind the method's parameters with the request's parameters by convention (bind them by their name)
 - [x] Bind the request's parameters using an annotation 
+- [ ] Paranamer library usage
+
+## Sprint 7 (Request parameter binding for objects)
+- [x] Look for the object parameter's field name
+- [x] Get their value from the request
+- [ ] Create an annotation for the object parameter's fields
