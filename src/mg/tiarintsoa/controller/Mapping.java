@@ -2,6 +2,7 @@ package mg.tiarintsoa.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import mg.tiarintsoa.annotation.RequestParameter;
+import mg.tiarintsoa.annotation.RequestSubParameter;
 import mg.tiarintsoa.reflection.Reflect;
 
 import java.lang.reflect.*;
@@ -48,11 +49,20 @@ public class Mapping {
 
         Object newValue = previousValue;
         for(Field field: parameterClass.getDeclaredFields()) {
-            String parameterValue = request.getParameter(parameterName + "." + field.getName());
-            if (parameterValue != null) {
+            String parameterSubValue = null;
+
+            if (field.isAnnotationPresent(RequestSubParameter.class)) {
+                RequestSubParameter annotation = field.getAnnotation(RequestSubParameter.class);
+                parameterSubValue = request.getParameter(parameterName + "." + annotation.value());
+            }
+
+            String conventionSubValue = request.getParameter(parameterName + "." + field.getName());
+            parameterSubValue = conventionSubValue == null ? parameterSubValue : conventionSubValue;
+
+            if (parameterSubValue != null) {
                 if (newValue == null) newValue = Reflect.createInstance(parameterClass);
                 field.setAccessible(true);
-                field.set(newValue, parameterValue);
+                field.set(newValue, parameterSubValue);
                 field.setAccessible(false);
             }
         }
