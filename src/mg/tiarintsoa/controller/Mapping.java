@@ -44,13 +44,12 @@ public class Mapping {
         return controllerInstance;
     }
 
-    private Object getValueFromParameterName(HttpServletRequest request, Object previousValue, Class<?> parameterClass, String parameterName) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException {
+    private Object getValueFromParameterName(HttpServletRequest request, Class<?> parameterClass, String parameterName) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException {
         if (parameterClass.equals(String.class)) {
-            String newValue = request.getParameter(parameterName);
-            return newValue == null ? previousValue : newValue;
+            return request.getParameter(parameterName);
         }
 
-        Object newValue = previousValue;
+        Object newValue = null;
         for(Field field: parameterClass.getDeclaredFields()) {
             String parameterSubValue = null;
 
@@ -73,24 +72,22 @@ public class Mapping {
         return newValue;
     }
 
-    private Object getRequestParameterValue(HttpServletRequest request, Parameter parameter) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        Object value = null;
+    private Object getRequestParameterValue(HttpServletRequest request, Parameter parameter) throws Exception {
+        Object value;
         Class<?> parameterClass = parameter.getType();
 
-        if (parameter.isAnnotationPresent(RequestParameter.class)) {
-            RequestParameter requestParameter = parameter.getAnnotation(RequestParameter.class);
-            String parameterName = requestParameter.value();
-            value = getValueFromParameterName(request, null, parameterClass, parameterName);
+        if (!parameter.isAnnotationPresent(RequestParameter.class)) {
+            throw new Exception("ETU003057: parameter \"" + parameter.getName() + "\" doesn't have the annotation @RequestParameter");
         }
 
-        // Override the annotation based values if convention values are found
-        String parameterName = parameter.getName();
-        value = getValueFromParameterName(request, value, parameterClass, parameterName);
+        RequestParameter requestParameter = parameter.getAnnotation(RequestParameter.class);
+        String parameterName = requestParameter.value();
+        value = getValueFromParameterName(request, parameterClass, parameterName);
 
         return value;
     }
 
-    public Object executeMethod(HttpServletRequest request) throws InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException {
+    public Object executeMethod(HttpServletRequest request) throws Exception {
         Object controllerInstance = getControllerInstance();
         Parameter[] parameters = method.getParameters();
         Object[] parametersValues = new Object[parameters.length];
