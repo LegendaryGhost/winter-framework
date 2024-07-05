@@ -50,3 +50,9 @@
 - [x] Look for the object parameter's field name
 - [x] Get their value from the request
 - [x] Create an annotation for the object parameter's fields
+### Sprint 7 bis
+- [x] Throw an error when the parameter of the endpoint isn't annotated
+
+## Sprint 8 (Custom session)
+- [ ] Create the session class
+- [ ] Inject the instance of the session into the controllers
