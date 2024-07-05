@@ -6,6 +6,8 @@ public class WinterSession {
 
     private HttpSession session;
 
+    public WinterSession() {}
+
     public WinterSession(HttpSession session) {
         this.session = session;
     }
