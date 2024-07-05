@@ -38,43 +38,9 @@ scan for **Controllers**
 </web-app>
 ```
 
-In the example above, the controllers_package init parameter is set to mg.winter.controller, which is the package that the winter-framework will scan for Controllers. You should replace this value with the package of your project that contains your Controllers.
-
-### Important note
-
-If you're manually compiling your java files, please add the **-parameters** option in order
-to make the request parameters binding work :
-
-```shell
-javac -parameters -d <your_destination_folder> -cp <your_class_path> <your_java_file>
-```
-
-If you're using Maven, you can add the following configuration to your pom.xml file:
-
-```xml
-<build>
-    <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.8.0</version>
-            <configuration>
-                <compilerArgs>
-                    <arg>-parameters</arg>
-                </compilerArgs>
-            </configuration>
-        </plugin>
-    </plugins>
-</build>
-```
-
-If you're using Gradle, you can add the following configuration to your build.gradle file:
-
-```groovy
-compileJava {
-    options.compilerArgs += ['-parameters']
-}
-```
+In the example above, the controllers_package init parameter is set to mg.winter.controller,
+which is the package that the winter-framework will scan for Controllers.
+You should replace this value with the package of your project that contains your Controllers.
 
 ## II - Usage
 
@@ -124,35 +90,11 @@ public class TestController {
 
 #### b) Parameters binding
 
-You can bind the parameters of a request to the parameters of an endpoint by **convention**.
-You only have to give them the same name. Here is an example:
-
-**URL:** "/employee?firstname=John&lastname=Doe"
-
-**Controller**:
-```java
-import mg.tiarintsoa.annotation.Controller;
-import mg.tiarintsoa.annotation.GetMapping;
-import mg.tiarintsoa.controller.ModelView;
-
-@Controller
-public class TestController {
-
-    @GetMapping("/employee")
-    public ModelView employee(String firstname, String lastname) {
-        ModelView modelView = new ModelView("employee.jsp");
-        modelView.addObject("firstname", firstname);
-        modelView.addObject("lastname", lastname);
-        return modelView;
-    }
-
-}
-```
-
-You can also bind the parameter using the **@RequestParameter** attribute.
+You can bind the parameters of a request to the parameters of an endpoint using the **@RequestParameter** attribute.
 Its value will be the name of the request parameter that will be bind to it.
+Here is an example:
 
-**URL**: "/employee?name=John&lastname=Doe"
+**URL**: "/employee?firstname=John&lastname=Doe"
 
 **Controller:**
 ```java
@@ -165,7 +107,7 @@ import mg.tiarintsoa.controller.ModelView;
 public class TestController {
 
     @GetMapping("/employee")
-    public ModelView employee(@RequestParameter("name") String firstname, String lastname) {
+    public ModelView employee(@RequestParameter("firstname") String firstname, @RequestParameter("lastname") String lastname) {
         ModelView modelView = new ModelView("employee.jsp");
         modelView.addObject("firstname", firstname);
         modelView.addObject("lastname", lastname);
@@ -177,17 +119,19 @@ public class TestController {
 
 Request parameters binding also works with objects.
 The objects' field value will be set based on their name and the field name following this pattern : **"\<parameterName>.\<fieldName>"**. 
-You can use both annotation and convention binding. Here is an example for more clarity:
+Here is an example for more clarity:
 
-**URL**: "/employee?employee.firstname=John&employee.name=Doe"
+**URL**: "/employee?employee.firstname=John&employee.lastname=Doe"
 
 **Entity:**
 ```java
 import mg.tiarintsoa.annotation.RequestSubParameter;
 
 public class Employee {
+    @RequestSubParameter("firstname")
     private String firstname;
-    @RequestSubParameter("name")
+    
+    @RequestSubParameter("lastname")
     private String lastname;
 
     public Employee() {}
@@ -219,8 +163,54 @@ public class TestController {
 
 **NB**:
 - Parameter binding only supports String or Object having String fields.
-- If the request contains both parameter's name and the annotation's value,
-the convention binding will be applied. In this case, if the URL looks like this :
-**"/employee?name=John&firstname=Alex"**, then the value of the parameter named firstname will be **"Alex"**.
-- If none of the convention and annotation binding can be applied then the parameter will be set to null.
+- If no binding can be applied then the parameter will be set to null.
 - Objects' class must contain an **empty constructor**
+
+### 2) Session
+
+To use the session, you can add a field of type **WinterSession** in your controller.
+It will be automatically detected and injected by the winter framework.
+The **WinterSession** class contains 3 generic method:
+
+- void add(String key, Object value)
+- Object get(String key)
+- void delete(String key)
+
+Its use case will look like this:
+
+```java
+import mg.tiarintsoa.annotation.Controller;
+import mg.tiarintsoa.annotation.GetMapping;
+import mg.tiarintsoa.annotation.RequestParameter;
+import mg.tiarintsoa.controller.ModelView;
+import mg.tiarintsoa.session.WinterSession;
+
+@Controller
+public class LoginController {
+
+    private WinterSession session;
+
+    /**
+     * Handles the login form submission
+     * @param email the email
+     * @param password the password
+     * @return the view
+     */
+    @GetMapping("/login")
+    public ModelView login(@RequestParameter("email") String email, @RequestParameter("password") String password) {
+        session.add("email", email);
+        session.add("password", password);
+
+        return new ModelView("home.jsp");
+    }
+
+    @GetMapping("/my-info")
+    public ModelView myInfo() {
+        ModelView modelView = new ModelView("my-info.jsp");
+        modelView.addObject("email", session.get("email"));
+        modelView.addObject("password", session.get("password"));
+        return modelView;
+    }
+
+}
+```
