@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import mg.tiarintsoa.annotation.RequestParameter;
 import mg.tiarintsoa.annotation.RequestSubParameter;
 import mg.tiarintsoa.reflection.Reflect;
+import mg.tiarintsoa.session.WinterSession;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -15,6 +16,7 @@ public class Mapping {
     private Class<?> controller;
     private Method method;
     private Object controllerInstance;
+    private static final WinterSession winterSession = new WinterSession();
 
     public Mapping(Class<?> controller, Method method) {
         this.controller = controller;
@@ -40,6 +42,15 @@ public class Mapping {
     public Object getControllerInstance() throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         if (controllerInstance == null) {
             controllerInstance = Reflect.createInstance(controller);
+            Field[] fields = controller.getDeclaredFields();
+            for (Field field: fields) {
+                Class<?> fieldType = field.getType();
+                if (fieldType.equals(WinterSession.class)) {
+                    field.setAccessible(true);
+                    field.set(controllerInstance, winterSession);
+                    field.setAccessible(false);
+                }
+            }
         }
         return controllerInstance;
     }
@@ -91,6 +102,9 @@ public class Mapping {
         Object controllerInstance = getControllerInstance();
         Parameter[] parameters = method.getParameters();
         Object[] parametersValues = new Object[parameters.length];
+
+        // Sets the session instance according to the user
+        winterSession.setSession(request.getSession());
 
         for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];

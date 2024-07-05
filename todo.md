@@ -44,9 +44,14 @@
 - [x] Get the names of the parameters
 - [x] Bind the method's parameters with the request's parameters by convention (bind them by their name)
 - [x] Bind the request's parameters using an annotation 
-- [ ] Paranamer library usage
 
 ## Sprint 7 (Request parameter binding for objects)
 - [x] Look for the object parameter's field name
 - [x] Get their value from the request
 - [x] Create an annotation for the object parameter's fields
+### Sprint 7 bis
+- [x] Throw an error when the parameter of the endpoint isn't annotated
+
+## Sprint 8 (Custom session)
+- [x] Create the session class
+- [x] Inject the instance of the session into the controllers' instance
