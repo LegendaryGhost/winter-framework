@@ -3,6 +3,7 @@ package mg.tiarintsoa.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import mg.tiarintsoa.annotation.RequestParameter;
 import mg.tiarintsoa.annotation.RequestSubParameter;
+import mg.tiarintsoa.annotation.RestAPI;
 import mg.tiarintsoa.reflection.Reflect;
 import mg.tiarintsoa.session.WinterSession;
 
@@ -37,6 +38,10 @@ public class Mapping {
 
     public void setMethod(Method method) {
         this.method = method;
+    }
+
+    public boolean isRestAPI() {
+        return controller.isAnnotationPresent(RestAPI.class);
     }
 
     public Object getControllerInstance() throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {

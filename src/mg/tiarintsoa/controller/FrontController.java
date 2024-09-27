@@ -1,5 +1,6 @@
 package mg.tiarintsoa.controller;
 
+import com.google.gson.Gson;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -18,6 +19,7 @@ import java.util.List;
 public class FrontController extends HttpServlet {
 
     private final HashMap<String, Mapping> urlMappings = new HashMap<>();
+    private final Gson gson = new Gson();
 
     @Override
     public void init() throws ServletException {
@@ -37,8 +39,10 @@ public class FrontController extends HttpServlet {
                 if (isGetMappingMethod(method)) {
                     String url = getGetMappingUrl(method);
                     validateUrlUniqueness(url);
-                    validateMethodReturnType(method, controller);
-                    urlMappings.put(url, new Mapping(controller, method));
+                    Mapping mapping = new Mapping(controller, method);
+                    // Bypass the return type check if it is a Rest controller
+                    if(!mapping.isRestAPI()) validateMethodReturnType(method, controller);
+                    urlMappings.put(url, mapping);
                 }
             }
         }
@@ -89,8 +93,6 @@ public class FrontController extends HttpServlet {
     }
 
     protected void processRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
-        PrintWriter out = resp.getWriter();
-
         // Get the part of the URL after the base URL of the webapp
         String requestURI = req.getRequestURI();
         String contextPath = req.getContextPath();
@@ -104,21 +106,47 @@ public class FrontController extends HttpServlet {
 
         try {
             Object responseObject = mapping.executeMethod(req);
-            if (responseObject instanceof String responseString) {
-                out.println("<p>" + responseString + "</p>");
-            } else if (responseObject instanceof ModelView modelView) {
-                // Bind the attributes to the request
-                HashMap<String, Object> data = modelView.getData();
-                for (String key: data.keySet()) {
-                    req.setAttribute(key, data.get(key));
-                }
-
-                // Forward the request to the view
-                RequestDispatcher dispatcher = req.getRequestDispatcher(modelView.getUrl());
-                dispatcher.forward(req, resp);
+            if (mapping.isRestAPI()) {
+                processRestRequest(resp, responseObject);
+            } else {
+                processBasicRequest(req, resp, responseObject);
             }
         } catch (Exception e) {
             throw new ServletException(e);
         }
+    }
+
+    protected void processBasicRequest(HttpServletRequest req, HttpServletResponse resp, Object responseObject) throws ServletException, IOException {
+        if (responseObject instanceof String responseString) {
+            PrintWriter out = resp.getWriter();
+            out.println("<main>" + responseString + "</main>");
+        } else if (responseObject instanceof ModelView modelView) {
+            // Bind the attributes to the request
+            HashMap<String, Object> data = modelView.getData();
+            for (String key: data.keySet()) {
+                req.setAttribute(key, data.get(key));
+            }
+
+            // Forward the request to the view
+            RequestDispatcher dispatcher = req.getRequestDispatcher(modelView.getUrl());
+            dispatcher.forward(req, resp);
+        }
+    }
+
+    protected void processRestRequest(HttpServletResponse resp, Object responseObject) throws IOException {
+        // Set the response type to JSON
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+
+        PrintWriter out = resp.getWriter();
+        String jsonResponse;
+
+        if (responseObject instanceof ModelView modelView) {
+            jsonResponse = gson.toJson(modelView.getData());
+        } else {
+            jsonResponse = gson.toJson(responseObject);
+        }
+
+        out.println(jsonResponse);
     }
 }
