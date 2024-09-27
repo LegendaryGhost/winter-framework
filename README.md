@@ -166,7 +166,47 @@ public class TestController {
 - If no binding can be applied then the parameter will be set to null.
 - Objects' class must contain an **empty constructor**
 
-### 2) Session
+### REST API
+
+If you want to make a REST controller, annotate the class with the @RestAPI annotation.
+The return value of all its method will be sent as a JSON response.
+If the return value is an instance of **ModelView** then the view will be ignored and
+its **data** attribute will be the response body instead.
+
+```java
+import mg.tiarintsoa.annotation.Controller;
+import mg.tiarintsoa.annotation.GetMapping;
+import mg.tiarintsoa.annotation.RestAPI;
+import mg.tiarintsoa.controller.ModelView;
+import mg.winter.entity.Employee;
+import java.util.ArrayList;
+import java.util.List;
+
+@Controller
+@RestAPI
+public class TestRestController {
+
+    @GetMapping("/json/emp")
+    public ModelView empList() {
+        ModelView modelView = new ModelView();
+        List<Employee> employees = new ArrayList<>();
+        employees.add(new Employee("Tiarintsoa", "Mbolatsiory"));
+        employees.add(new Employee("John", "Doe"));
+        employees.add(new Employee("Jeanne", "Doe"));
+        modelView.addObject("message", "Here is the employee list");
+        modelView.addObject("employees", employees);
+        return modelView;
+    }
+
+    @GetMapping("/json/emp/1")
+    public Employee empDetails() {
+        return new Employee("Tiarintsoa", "Mbolatsiory");
+    }
+
+}
+```
+
+### 3) Session
 
 To use the session, you can add a field of type **WinterSession** in your controller.
 It will be automatically detected and injected by the winter framework.
