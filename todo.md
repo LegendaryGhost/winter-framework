@@ -55,3 +55,10 @@
 ## Sprint 8 (Custom session)
 - [x] Create the session class
 - [x] Inject the instance of the session into the controllers' instance
+
+## Sprint 9 (API)
+- [x] Create the @RestAPI class annotation
+- [x] In the FrontServlet, check if the controllers are annotated
+  - [x] While invoking the controller's method, return a JSON response if it is the case
+    - [x] Serialize the data attribute if the Object is a ModelView instance
+    - [x] Otherwise, serialize it immediately
