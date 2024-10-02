@@ -176,14 +176,14 @@ its **data** attribute will be the response body instead.
 ```java
 import mg.tiarintsoa.annotation.Controller;
 import mg.tiarintsoa.annotation.GetMapping;
-import mg.tiarintsoa.annotation.RestAPI;
+import mg.tiarintsoa.annotation.RestController;
 import mg.tiarintsoa.controller.ModelView;
 import mg.winter.entity.Employee;
 import java.util.ArrayList;
 import java.util.List;
 
 @Controller
-@RestAPI
+@RestController
 public class TestRestController {
 
     @GetMapping("/json/emp")
@@ -203,6 +203,32 @@ public class TestRestController {
         return new Employee("Tiarintsoa", "Mbolatsiory");
     }
 
+}
+```
+
+You can also annotate a single end point in a controller
+
+```java
+import mg.tiarintsoa.annotation.Controller;
+import mg.tiarintsoa.annotation.GetMapping;
+import mg.tiarintsoa.annotation.RestEndPoint;
+import mg.tiarintsoa.controller.ModelView;
+import mg.winter.entity.Employee;
+
+public class TestController {
+    
+    @GetMapping("/")
+    public ModelView message() {
+        ModelView modelView = new ModelView("message.jsp");
+        modelView.addObject("message", "Hello world !");
+        return modelView;
+    }
+
+    @RestEndPoint
+    @GetMapping("/json/emp/2")
+    public Employee empDetails() {
+        return new Employee("Kevin", "Ramaro");
+    }
 }
 ```
 
