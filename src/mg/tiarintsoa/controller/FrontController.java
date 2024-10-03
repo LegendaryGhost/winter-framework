@@ -7,7 +7,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import mg.tiarintsoa.annotation.Controller;
-import mg.tiarintsoa.annotation.GetMapping;
+import mg.tiarintsoa.annotation.UrlMapping;
+import mg.tiarintsoa.enumeration.RequestVerb;
 import mg.tiarintsoa.reflection.Reflect;
 
 import java.io.IOException;
@@ -36,13 +37,21 @@ public class FrontController extends HttpServlet {
         List<Class<?>> controllers = getAnnotatedControllers(controllersPackage);
         for (Class<?> controller : controllers) {
             for (Method method : controller.getDeclaredMethods()) {
-                if (isGetMappingMethod(method)) {
-                    String url = getGetMappingUrl(method);
-                    validateUrlUniqueness(url);
-                    Mapping mapping = new Mapping(controller, method);
-                    // Bypass the return type check if it is a Rest controller
-                    if(!mapping.isRestAPI()) validateMethodReturnType(method, controller);
-                    urlMappings.put(url, mapping);
+                if (isEndPointMethod(method)) {
+                    String url = getMappedUrl(method);
+                    RequestVerb verb = getMappedVerb(method);
+
+                    Mapping mapping = urlMappings.get(url);
+                    if(mapping == null) {
+                        mapping = new Mapping(controller);
+                        urlMappings.put(url, mapping);
+                    }
+
+                    try {
+                        mapping.addVerbMapping(verb, method, url);
+                    } catch (Exception e) {
+                        throw new ServletException(e);
+                    }
                 }
             }
         }
@@ -67,13 +76,17 @@ public class FrontController extends HttpServlet {
         }
     }
 
-    private boolean isGetMappingMethod(Method method) {
-        return method.isAnnotationPresent(GetMapping.class);
+    private boolean isEndPointMethod(Method method) {
+        return method.isAnnotationPresent(UrlMapping.class);
     }
 
-    private String getGetMappingUrl(Method method) {
-        GetMapping getMapping = method.getAnnotation(GetMapping.class);
-        return getMapping.value();
+    private String getMappedUrl(Method method) {
+        UrlMapping url = method.getAnnotation(UrlMapping.class);
+        return url.value();
+    }
+
+    private RequestVerb getMappedVerb(Method method) {
+        return method.getAnnotation(UrlMapping.class).verb();
     }
 
     private void validateUrlUniqueness(String url) throws ServletException {
@@ -84,15 +97,15 @@ public class FrontController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
-        processRequest(req, resp);
+        processRequest(req, resp, RequestVerb.GET);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
-        processRequest(req, resp);
+        processRequest(req, resp, RequestVerb.POST);
     }
 
-    protected void processRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+    protected void processRequest(HttpServletRequest req, HttpServletResponse resp, RequestVerb verb) throws IOException, ServletException {
         // Get the part of the URL after the base URL of the webapp
         String requestURI = req.getRequestURI();
         String contextPath = req.getContextPath();
@@ -105,8 +118,8 @@ public class FrontController extends HttpServlet {
         }
 
         try {
-            Object responseObject = mapping.executeMethod(req);
-            if (mapping.isRestAPI()) {
+            Object responseObject = mapping.executeMethod(req, verb, url);
+            if (mapping.isRestAPI(verb)) {
                 processRestRequest(resp, responseObject);
             } else {
                 processBasicRequest(req, resp, responseObject);

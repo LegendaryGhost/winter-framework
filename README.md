@@ -61,25 +61,26 @@ Here is an example:
 
 ```java
 import mg.tiarintsoa.annotation.Controller;
-import mg.tiarintsoa.annotation.GetMapping;
+import mg.tiarintsoa.annotation.UrlMapping;
 import mg.tiarintsoa.controller.ModelView;
 
 @Controller
 public class TestController {
 
-    @GetMapping("/")
+    @UrlMapping("/")
     public ModelView message() {
         ModelView mw = new ModelView("message.jsp");
         mw.addObject("message", "Hello world !");
         return mw;
     }
 
-    @GetMapping("/end-point-2")
+    @UrlMapping("/end-point-2")
     public String endPoint2() {
         return "End point 2";
     }
 
-    public void notAnEndPoint() {}
+    public void notAnEndPoint() {
+    }
 
 }
 ```
@@ -97,16 +98,17 @@ Here is an example:
 **URL**: "/employee?firstname=John&lastname=Doe"
 
 **Controller:**
+
 ```java
 import mg.tiarintsoa.annotation.Controller;
-import mg.tiarintsoa.annotation.GetMapping;
+import mg.tiarintsoa.annotation.UrlMapping;
 import mg.tiarintsoa.annotation.RequestParameter;
 import mg.tiarintsoa.controller.ModelView;
 
 @Controller
 public class TestController {
 
-    @GetMapping("/employee")
+    @UrlMapping("/employee")
     public ModelView employee(@RequestParameter("firstname") String firstname, @RequestParameter("lastname") String lastname) {
         ModelView modelView = new ModelView("employee.jsp");
         modelView.addObject("firstname", firstname);
@@ -141,9 +143,10 @@ public class Employee {
 ```
 
 **Controller:**
+
 ```java
 import mg.tiarintsoa.annotation.Controller;
-import mg.tiarintsoa.annotation.GetMapping;
+import mg.tiarintsoa.annotation.UrlMapping;
 import mg.tiarintsoa.annotation.RequestParameter;
 import mg.tiarintsoa.controller.ModelView;
 import mg.winter.entity.Employee;
@@ -151,7 +154,7 @@ import mg.winter.entity.Employee;
 @Controller
 public class TestController {
 
-    @GetMapping("/employee")
+    @UrlMapping("/employee")
     public ModelView employee(@RequestParameter("employee") Employee emp) {
         ModelView modelView = new ModelView("employee.jsp");
         modelView.addObject("emp", emp);
@@ -175,7 +178,7 @@ its **data** attribute will be the response body instead.
 
 ```java
 import mg.tiarintsoa.annotation.Controller;
-import mg.tiarintsoa.annotation.GetMapping;
+import mg.tiarintsoa.annotation.UrlMapping;
 import mg.tiarintsoa.annotation.RestController;
 import mg.tiarintsoa.controller.ModelView;
 import mg.winter.entity.Employee;
@@ -186,7 +189,7 @@ import java.util.List;
 @RestController
 public class TestRestController {
 
-    @GetMapping("/json/emp")
+    @UrlMapping("/json/emp")
     public ModelView empList() {
         ModelView modelView = new ModelView();
         List<Employee> employees = new ArrayList<>();
@@ -198,7 +201,7 @@ public class TestRestController {
         return modelView;
     }
 
-    @GetMapping("/json/emp/1")
+    @UrlMapping("/json/emp/1")
     public Employee empDetails() {
         return new Employee("Tiarintsoa", "Mbolatsiory");
     }
@@ -209,15 +212,15 @@ public class TestRestController {
 You can also annotate a single end point in a controller
 
 ```java
-import mg.tiarintsoa.annotation.Controller;
-import mg.tiarintsoa.annotation.GetMapping;
+
+import mg.tiarintsoa.annotation.UrlMapping;
 import mg.tiarintsoa.annotation.RestEndPoint;
 import mg.tiarintsoa.controller.ModelView;
 import mg.winter.entity.Employee;
 
 public class TestController {
-    
-    @GetMapping("/")
+
+    @UrlMapping("/")
     public ModelView message() {
         ModelView modelView = new ModelView("message.jsp");
         modelView.addObject("message", "Hello world !");
@@ -225,7 +228,7 @@ public class TestController {
     }
 
     @RestEndPoint
-    @GetMapping("/json/emp/2")
+    @UrlMapping("/json/emp/2")
     public Employee empDetails() {
         return new Employee("Kevin", "Ramaro");
     }
@@ -246,7 +249,7 @@ Its use case will look like this:
 
 ```java
 import mg.tiarintsoa.annotation.Controller;
-import mg.tiarintsoa.annotation.GetMapping;
+import mg.tiarintsoa.annotation.UrlMapping;
 import mg.tiarintsoa.annotation.RequestParameter;
 import mg.tiarintsoa.controller.ModelView;
 import mg.tiarintsoa.session.WinterSession;
@@ -262,7 +265,7 @@ public class LoginController {
      * @param password the password
      * @return the view
      */
-    @GetMapping("/login")
+    @UrlMapping("/login")
     public ModelView login(@RequestParameter("email") String email, @RequestParameter("password") String password) {
         session.add("email", email);
         session.add("password", password);
@@ -270,7 +273,7 @@ public class LoginController {
         return new ModelView("home.jsp");
     }
 
-    @GetMapping("/my-info")
+    @UrlMapping("/my-info")
     public ModelView myInfo() {
         ModelView modelView = new ModelView("my-info.jsp");
         modelView.addObject("email", session.get("email"));

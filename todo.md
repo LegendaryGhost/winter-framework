@@ -63,3 +63,7 @@
   - [x] While invoking the controller's method, return a JSON response if it is the case
     - [x] Serialize the data attribute if the Object is a ModelView instance
       - [x] Otherwise, serialize it immediately
+
+## Sprint 10 (POST VERB)
+- [ ] Request verb enumeration
+- [ ]  
