@@ -3,7 +3,9 @@ package mg.tiarintsoa.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import mg.tiarintsoa.annotation.RequestParameter;
 import mg.tiarintsoa.annotation.RequestSubParameter;
-import mg.tiarintsoa.annotation.RestAPI;
+import mg.tiarintsoa.annotation.RestController;
+import mg.tiarintsoa.annotation.RestEndPoint;
+import mg.tiarintsoa.enumeration.RequestVerb;
 import mg.tiarintsoa.reflection.Reflect;
 import mg.tiarintsoa.session.WinterSession;
 
@@ -11,37 +13,26 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.HashMap;
 
 public class Mapping {
 
-    private Class<?> controller;
-    private Method method;
+    private final Class<?> controller;
+    private final HashMap<RequestVerb, Method> methods = new HashMap<>();
     private Object controllerInstance;
     private static final WinterSession winterSession = new WinterSession();
 
-    public Mapping(Class<?> controller, Method method) {
-        this.controller = controller;
-        this.method = method;
-    }
-
-    public Class<?> getController() {
-        return controller;
-    }
-
-    public void setController(Class<?> controller) {
+    public Mapping(Class<?> controller) {
         this.controller = controller;
     }
 
-    public Method getMethod() {
-        return method;
+    public void addVerbMapping(RequestVerb verb, Method method, String url) throws Exception {
+        if (methods.containsKey(verb)) throw new Exception("The url and verb (" + url + ", " + verb + ") cannot be mapped more than one time");
+        methods.put(verb, method);
     }
 
-    public void setMethod(Method method) {
-        this.method = method;
-    }
-
-    public boolean isRestAPI() {
-        return controller.isAnnotationPresent(RestAPI.class);
+    public boolean isRestAPI(RequestVerb verb) {
+        return methods.get(verb).isAnnotationPresent(RestEndPoint.class) || controller.isAnnotationPresent(RestController.class);
     }
 
     public Object getControllerInstance() throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
@@ -103,7 +94,10 @@ public class Mapping {
         return value;
     }
 
-    public Object executeMethod(HttpServletRequest request) throws Exception {
+    public Object executeMethod(HttpServletRequest request, RequestVerb verb, String url) throws Exception {
+        Method method = methods.get(verb);
+        if (method == null) throw new Exception("The URL \"" + url + "\" is not associated with the verb " + verb);
+
         Object controllerInstance = getControllerInstance();
         Parameter[] parameters = method.getParameters();
         Object[] parametersValues = new Object[parameters.length];
