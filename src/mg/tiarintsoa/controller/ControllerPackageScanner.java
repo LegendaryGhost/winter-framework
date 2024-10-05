@@ -2,6 +2,7 @@ package mg.tiarintsoa.controller;
 
 import jakarta.servlet.ServletException;
 import mg.tiarintsoa.annotation.Controller;
+import mg.tiarintsoa.annotation.Post;
 import mg.tiarintsoa.annotation.UrlMapping;
 import mg.tiarintsoa.enumeration.RequestVerb;
 import mg.tiarintsoa.reflection.Reflect;
@@ -75,7 +76,7 @@ public class ControllerPackageScanner {
     }
 
     private static RequestVerb getMappedVerb(Method method) {
-        return method.getAnnotation(UrlMapping.class).verb();
+        return method.isAnnotationPresent(Post.class) ? RequestVerb.POST : RequestVerb.GET;
     }
 
 }
