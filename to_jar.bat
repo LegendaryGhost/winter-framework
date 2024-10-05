@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set "work_dir=C:\Users\itu\Documents\S4\web-dynamique\winter-framework"
+set "work_dir=.\"
 set "src=%work_dir%\src"
 set "lib=%work_dir%\lib"
 set "bin=%work_dir%\classes"
