@@ -169,7 +169,53 @@ public class TestController {
 - If no binding can be applied then the parameter will be set to null.
 - Objects' class must contain an **empty constructor**
 
-### REST API
+#### c) Verb
+
+The winter-framework only supports GET and POST verbs for now.
+You can specify it using the @Get or @Post annotation.
+If no verb is specified, the GET verb will be applied by default.
+
+```java
+import mg.tiarintsoa.annotation.*;
+import mg.tiarintsoa.controller.ModelView;
+import mg.tiarintsoa.enumeration.RequestVerb;
+import mg.winter.entity.Employee;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Controller
+@RestController
+public class TestRestController {
+
+    @UrlMapping("/json/emp")
+    public ModelView empList() {
+        ModelView modelView = new ModelView();
+        List<Employee> employees = new ArrayList<>();
+        employees.add(new Employee("Tiarintsoa", "Mbolatsiory"));
+        employees.add(new Employee("Henintsoa", "Paul"));
+        employees.add(new Employee("Ryan", "Lizka"));
+        modelView.addObject("message", "Here is the employee list");
+        modelView.addObject("employees", employees);
+        return modelView;
+    }
+
+    @Get
+    @UrlMapping(value = "/json/emp/1")
+    public Employee empDetails() {
+        return new Employee("Tiarintsoa", "Mbolatsiory");
+    }
+
+    @Post
+    @UrlMapping(value = "/json/emp/1")
+    public Employee empDetailsPost() {
+        return new Employee("Tiarintsoa", "Mbolatsiory");
+    }
+
+}
+```
+
+### 2) REST API
 
 If you want to make a REST controller, annotate the class with the @RestAPI annotation.
 The return value of all its method will be sent as a JSON response.
