@@ -33,10 +33,9 @@ public class ControllerPackageScanner {
                         urlMappings.put(url, mapping);
                     }
 
-                    if (!mapping.isRestAPI(verb)) validateMethodReturnType(method, controller);
-
                     try {
                         mapping.addVerbMapping(verb, method, url);
+                        if (!mapping.isRestAPI(verb)) validateMethodReturnType(method, controller);
                     } catch (Exception e) {
                         throw new ServletException(e);
                     }
