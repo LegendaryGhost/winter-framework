@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import mg.tiarintsoa.enumeration.RequestVerb;
+import mg.tiarintsoa.exception.VerbNotFoundException;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -52,6 +53,8 @@ public class FrontController extends HttpServlet {
             } else {
                 processBasicRequest(req, resp, responseObject);
             }
+        } catch (VerbNotFoundException e) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
         } catch (Exception e) {
             throw new ServletException(e);
         }

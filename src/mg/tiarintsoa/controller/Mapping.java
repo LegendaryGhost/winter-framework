@@ -6,6 +6,7 @@ import mg.tiarintsoa.annotation.RequestSubParameter;
 import mg.tiarintsoa.annotation.RestController;
 import mg.tiarintsoa.annotation.RestEndPoint;
 import mg.tiarintsoa.enumeration.RequestVerb;
+import mg.tiarintsoa.exception.VerbNotFoundException;
 import mg.tiarintsoa.reflection.Reflect;
 import mg.tiarintsoa.session.WinterSession;
 
@@ -96,7 +97,7 @@ public class Mapping {
 
     public Object executeMethod(HttpServletRequest request, RequestVerb verb, String url) throws Exception {
         Method method = methods.get(verb);
-        if (method == null) throw new Exception("The URL \"" + url + "\" is not associated with the verb " + verb);
+        if (method == null) throw new VerbNotFoundException("The URL \"" + url + "\" is not associated with the verb " + verb);
 
         Object controllerInstance = getControllerInstance();
         Parameter[] parameters = method.getParameters();
