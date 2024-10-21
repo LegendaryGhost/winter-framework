@@ -1,10 +1,7 @@
 package mg.tiarintsoa.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
-import mg.tiarintsoa.annotation.RequestParameter;
-import mg.tiarintsoa.annotation.RequestSubParameter;
-import mg.tiarintsoa.annotation.RestController;
-import mg.tiarintsoa.annotation.RestEndPoint;
+import mg.tiarintsoa.annotation.*;
 import mg.tiarintsoa.enumeration.RequestVerb;
 import mg.tiarintsoa.exception.VerbNotFoundException;
 import mg.tiarintsoa.reflection.Reflect;
@@ -25,6 +22,10 @@ public class Mapping {
 
     public Mapping(Class<?> controller) {
         this.controller = controller;
+    }
+
+    public Class<?> getController() {
+        return controller;
     }
 
     public void addVerbMapping(RequestVerb verb, Method method, String url) throws Exception {
@@ -52,18 +53,21 @@ public class Mapping {
         return controllerInstance;
     }
 
-    private Object getValueFromParameterName(HttpServletRequest request, Class<?> parameterClass, String parameterName) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException {
+    private Object getValueFromParameterName(HttpServletRequest request, Class<?> parameterClass, String parameterName) throws Exception {
         if (parameterClass.equals(String.class)) {
             return request.getParameter(parameterName);
         }
 
         Object newValue = null;
         for(Field field: parameterClass.getDeclaredFields()) {
-            String parameterSubValue = null;
+            Object parameterSubValue = null;
 
-            if (field.isAnnotationPresent(RequestSubParameter.class)) {
-                RequestSubParameter annotation = field.getAnnotation(RequestSubParameter.class);
+            if (field.isAnnotationPresent(RequestParameter.class)) {
+                RequestParameter annotation = field.getAnnotation(RequestParameter.class);
                 parameterSubValue = request.getParameter(parameterName + "." + annotation.value());
+            } else if (field.isAnnotationPresent(RequestFile.class)) {
+                RequestFile annotation = field.getAnnotation(RequestFile.class);
+                parameterSubValue = getPartFromFileName(request, field.getType(), parameterName + "." + annotation.value());
             }
 
             String conventionSubValue = request.getParameter(parameterName + "." + field.getName());
@@ -80,17 +84,29 @@ public class Mapping {
         return newValue;
     }
 
+    private WinterPart getPartFromFileName(HttpServletRequest request, Class<?> parameterClass, String fileName) throws Exception {
+        if (!parameterClass.equals(WinterPart.class)) {
+            throw new Exception("Parameter annotated with @RequestFile should be of type WinterPart");
+        }
+
+        return new WinterPart(request.getPart(fileName));
+    }
+
     private Object getRequestParameterValue(HttpServletRequest request, Parameter parameter) throws Exception {
         Object value;
         Class<?> parameterClass = parameter.getType();
 
-        if (!parameter.isAnnotationPresent(RequestParameter.class)) {
-            throw new Exception("ETU003057: parameter \"" + parameter.getName() + "\" doesn't have the annotation @RequestParameter");
+        if (parameter.isAnnotationPresent(RequestParameter.class)) {
+            RequestParameter requestParameter = parameter.getAnnotation(RequestParameter.class);
+            String parameterName = requestParameter.value();
+            value = getValueFromParameterName(request, parameterClass, parameterName);
+        } else if (parameter.isAnnotationPresent(RequestFile.class)) {
+            RequestFile requestFile = parameter.getAnnotation(RequestFile.class);
+            String fileName = requestFile.value();
+            value = getPartFromFileName(request, parameterClass, fileName);
+        } else {
+            throw new Exception("ETU003057: parameter \"" + parameter.getName() + "\" doesn't have the annotation @RequestParameter or @RequestFile");
         }
-
-        RequestParameter requestParameter = parameter.getAnnotation(RequestParameter.class);
-        String parameterName = requestParameter.value();
-        value = getValueFromParameterName(request, parameterClass, parameterName);
 
         return value;
     }

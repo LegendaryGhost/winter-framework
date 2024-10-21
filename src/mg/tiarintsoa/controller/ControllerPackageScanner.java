@@ -33,6 +33,10 @@ public class ControllerPackageScanner {
                         urlMappings.put(url, mapping);
                     }
 
+                    if (!mapping.getController().equals(controller)) {
+                        throw new ServletException("The URL \"" + url + "\" should not be mapped in 2 different controllers.");
+                    }
+
                     try {
                         mapping.addVerbMapping(verb, method, url);
                         if (!mapping.isRestAPI(verb)) validateMethodReturnType(method, controller);
