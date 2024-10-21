@@ -2,6 +2,7 @@ package mg.tiarintsoa.controller;
 
 import jakarta.servlet.http.Part;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -34,6 +35,14 @@ public class WinterPart {
     }
 
     public void save(String filePath) throws IOException {
+        File file = new File(filePath);
+
+        // Create parent directories if they don't exist
+        File parentDir = file.getParentFile();
+        if (parentDir != null && !parentDir.exists()) {
+            parentDir.mkdirs();  // Create all non-existing directories
+        }
+
         part.write(filePath);
     }
 }

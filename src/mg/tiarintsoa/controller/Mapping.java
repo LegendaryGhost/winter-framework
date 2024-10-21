@@ -62,8 +62,8 @@ public class Mapping {
         for(Field field: parameterClass.getDeclaredFields()) {
             Object parameterSubValue = null;
 
-            if (field.isAnnotationPresent(RequestSubParameter.class)) {
-                RequestSubParameter annotation = field.getAnnotation(RequestSubParameter.class);
+            if (field.isAnnotationPresent(RequestParameter.class)) {
+                RequestParameter annotation = field.getAnnotation(RequestParameter.class);
                 parameterSubValue = request.getParameter(parameterName + "." + annotation.value());
             } else if (field.isAnnotationPresent(RequestFile.class)) {
                 RequestFile annotation = field.getAnnotation(RequestFile.class);

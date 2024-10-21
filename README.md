@@ -127,13 +127,13 @@ Here is an example for more clarity:
 
 **Entity:**
 ```java
-import mg.tiarintsoa.annotation.RequestSubParameter;
+import mg.tiarintsoa.annotation.RequestParameter;
 
 public class Employee {
-    @RequestSubParameter("firstname")
+    @RequestParameter("firstname")
     private String firstname;
     
-    @RequestSubParameter("lastname")
+    @RequestParameter("lastname")
     private String lastname;
 
     public Employee() {}
