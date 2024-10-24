@@ -65,5 +65,13 @@
       - [x] Otherwise, serialize it immediately
 
 ## Sprint 10 (POST VERB)
-- [ ] Request verb enumeration
-- [ ]  
+- [x] Request verb enumeration
+- [x] Verb - Method HashMap handling in Mapping class
+
+## Sprint 11 (Error 404: Verb not supported)
+- [x] Send a 404 status code when the verb is not associated with the URL specified
+
+## Sprint 12 (File upload)
+- [x] WinterPart class
+- [x] File upload on server
+- [x] Static resource display
