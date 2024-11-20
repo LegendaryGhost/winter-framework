@@ -75,3 +75,12 @@
 - [x] WinterPart class
 - [x] File upload on server
 - [x] Static resource display
+
+## Sprint 13 (Request parameters validation)
+- [ ] Move the @RequestParameter annotation check
+- [ ] Create the necessary annotations
+  - [x] Required
+  - [x] NotBlank
+  - [ ] Range
+- [x] Throw an error when a parameter is not valid
+- [ ] Update README

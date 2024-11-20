@@ -6,6 +6,7 @@ import mg.tiarintsoa.enumeration.RequestVerb;
 import mg.tiarintsoa.exception.VerbNotFoundException;
 import mg.tiarintsoa.reflection.Reflect;
 import mg.tiarintsoa.session.WinterSession;
+import mg.tiarintsoa.validation.ParameterValidator;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -125,6 +126,7 @@ public class Mapping {
         for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];
             parametersValues[i] = getRequestParameterValue(request, parameter);
+            ParameterValidator.validate(parametersValues[i], parameter);
         }
 
         return method.invoke(controllerInstance, parametersValues);
