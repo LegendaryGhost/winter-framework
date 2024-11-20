@@ -2,9 +2,11 @@ package mg.tiarintsoa.controller;
 
 import jakarta.servlet.http.Part;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class WinterPart {
 
@@ -35,14 +37,20 @@ public class WinterPart {
     }
 
     public void save(String filePath) throws IOException {
-        File file = new File(filePath);
+        // Create the full path
+        Path path = Paths.get(FrontController.STATIC_DIRECTORY + filePath);
 
-        // Create parent directories if they don't exist
-        File parentDir = file.getParentFile();
-        if (parentDir != null && !parentDir.exists()) {
-            parentDir.mkdirs();  // Create all non-existing directories
+        // Get the parent directory of the file
+        Path parentDir = path.getParent();
+
+        // Create directories if they don't exist
+        if (parentDir != null && !Files.exists(parentDir)) {
+            Files.createDirectories(parentDir);
         }
 
-        part.write(filePath);
+        // Write the file content to the specified path
+        Files.write(path, getBytes());
+
+        System.out.println("File saved to: " + path.toAbsolutePath());
     }
 }
