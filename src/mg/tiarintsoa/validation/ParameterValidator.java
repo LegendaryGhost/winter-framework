@@ -2,10 +2,12 @@ package mg.tiarintsoa.validation;
 
 import mg.tiarintsoa.exception.InvalidRequestParameterException;
 import mg.tiarintsoa.validation.annotation.NotBlank;
+import mg.tiarintsoa.validation.annotation.Number;
 import mg.tiarintsoa.validation.annotation.Required;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
+import java.math.BigDecimal;
 
 public class ParameterValidator {
 
@@ -17,6 +19,10 @@ public class ParameterValidator {
         if (parameter.isAnnotationPresent(NotBlank.class)) {
             NotBlank notBlankAnnotation = parameter.getAnnotation(NotBlank.class);
             validateNotBlank(value, notBlankAnnotation);
+        }
+        if (parameter.isAnnotationPresent(Number.class)) {
+            Number numberAnnotation = parameter.getAnnotation(Number.class);
+            validateNumber(value, numberAnnotation);
         }
 
         Class<?> parameterClass = parameter.getType();
@@ -37,6 +43,10 @@ public class ParameterValidator {
                 NotBlank notBlankAnnotation = field.getAnnotation(NotBlank.class);
                 validateNotBlank(fieldValue, notBlankAnnotation);
             }
+            if (field.isAnnotationPresent(Number.class)) {
+                Number numberAnnotation = field.getAnnotation(Number.class);
+                validateNumber(fieldValue, numberAnnotation);
+            }
         }
     }
 
@@ -52,6 +62,24 @@ public class ParameterValidator {
         }
         if (value.toString().isEmpty()) {
             throw new InvalidRequestParameterException(annotation.message());
+        }
+    }
+
+    private static void validateNumber(Object value, Number annotation) {
+        if (value == null) {
+            throw new InvalidRequestParameterException(annotation.message());
+        }
+        if(!isValidNumber(value.toString())) {
+            throw new InvalidRequestParameterException(annotation.message());
+        }
+    }
+
+    private static boolean isValidNumber(String str) {
+        try {
+            new BigDecimal(str); // Handles integers, floating-point numbers, and decimals
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 
