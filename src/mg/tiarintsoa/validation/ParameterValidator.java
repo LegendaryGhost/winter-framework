@@ -5,6 +5,7 @@ import mg.tiarintsoa.validation.annotation.NotBlank;
 import mg.tiarintsoa.validation.annotation.Number;
 import mg.tiarintsoa.validation.annotation.Required;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
 import java.math.BigDecimal;
@@ -12,18 +13,7 @@ import java.math.BigDecimal;
 public class ParameterValidator {
 
     public static void validate(Object value, Parameter parameter) throws IllegalAccessException {
-        if (parameter.isAnnotationPresent(Required.class)) {
-            Required requiredAnnotation = parameter.getAnnotation(Required.class);
-            validateRequired(value, requiredAnnotation);
-        }
-        if (parameter.isAnnotationPresent(NotBlank.class)) {
-            NotBlank notBlankAnnotation = parameter.getAnnotation(NotBlank.class);
-            validateNotBlank(value, notBlankAnnotation);
-        }
-        if (parameter.isAnnotationPresent(Number.class)) {
-            Number numberAnnotation = parameter.getAnnotation(Number.class);
-            validateNumber(value, numberAnnotation);
-        }
+        checkValidationAnnotations(parameter, value);
 
         Class<?> parameterClass = parameter.getType();
         if (parameterClass.equals(String.class)) {
@@ -35,18 +25,22 @@ public class ParameterValidator {
             Object fieldValue = field.get(value);
             field.setAccessible(false);
 
-            if (field.isAnnotationPresent(Required.class)) {
-                Required requiredAnnotation = field.getAnnotation(Required.class);
-                validateRequired(fieldValue, requiredAnnotation);
-            }
-            if (field.isAnnotationPresent(NotBlank.class)) {
-                NotBlank notBlankAnnotation = field.getAnnotation(NotBlank.class);
-                validateNotBlank(fieldValue, notBlankAnnotation);
-            }
-            if (field.isAnnotationPresent(Number.class)) {
-                Number numberAnnotation = field.getAnnotation(Number.class);
-                validateNumber(fieldValue, numberAnnotation);
-            }
+            checkValidationAnnotations(field, fieldValue);
+        }
+    }
+
+    private static void checkValidationAnnotations(AnnotatedElement annotatedElement, Object value) {
+        if (annotatedElement.isAnnotationPresent(Required.class)) {
+            Required requiredAnnotation = annotatedElement.getAnnotation(Required.class);
+            validateRequired(value, requiredAnnotation);
+        }
+        if (annotatedElement.isAnnotationPresent(NotBlank.class)) {
+            NotBlank notBlankAnnotation = annotatedElement.getAnnotation(NotBlank.class);
+            validateNotBlank(value, notBlankAnnotation);
+        }
+        if (annotatedElement.isAnnotationPresent(Number.class)) {
+            Number numberAnnotation = annotatedElement.getAnnotation(Number.class);
+            validateNumber(value, numberAnnotation);
         }
     }
 
