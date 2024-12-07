@@ -69,7 +69,7 @@ public class Mapping {
             try {
                 return Integer.parseInt(request.getParameter(parameterName));
             } catch (NumberFormatException e) {
-                return parameterClass.equals(int.class) ? 0 : null;
+                return null;
             }
         }
 
@@ -77,7 +77,7 @@ public class Mapping {
             try {
                 return Double.parseDouble(request.getParameter(parameterName));
             } catch (NumberFormatException e) {
-                return parameterClass.equals(double.class) ? 0.0 : null;
+                return null;
             }
         }
 
@@ -152,6 +152,14 @@ public class Mapping {
             Parameter parameter = parameters[i];
             parametersValues[i] = getRequestParameterValue(request, parameter, fieldErrors);
             ParameterValidator.validateParameter(parametersValues[i], parameter, fieldErrors);
+        }
+
+        // Converts the primitive types to their default values after the field validation is processed
+        for (int i = 0; i < parameters.length; i++) {
+            Parameter parameter = parameters[i];
+            if (parametersValues[i] != null) continue;
+            if (parameter.getType().equals(int.class)) parametersValues[i] = 0;
+            if (parameter.getType().equals(double.class)) parametersValues[i] = 0.0;
         }
 
         return method.invoke(controllerInstance, parametersValues);

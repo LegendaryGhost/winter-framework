@@ -31,7 +31,7 @@ public class ParameterValidator {
             Object fieldValue = field.get(value);
             field.setAccessible(false);
 
-            if (!field.isAnnotationPresent(RequestParameter.class)) break;
+            if (!field.isAnnotationPresent(RequestParameter.class)) continue;
 
             String fieldName = field.getAnnotation(RequestParameter.class).value();
             checkValidationAnnotations(field, parameterName + "." + fieldName, fieldValue, fieldErrors);
