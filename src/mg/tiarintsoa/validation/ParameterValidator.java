@@ -14,7 +14,12 @@ import java.math.BigDecimal;
 public class ParameterValidator {
 
     public static void validate(Object value, Parameter parameter, FieldErrors fieldErrors) throws IllegalAccessException {
-        checkValidationAnnotations(parameter, value, fieldErrors);
+
+        if (!parameter.isAnnotationPresent(RequestParameter.class)) return;
+
+        RequestParameter requestParameter = parameter.getAnnotation(RequestParameter.class);
+        String parameterName = requestParameter.value();
+        checkValidationAnnotations(parameter, parameterName, value, fieldErrors);
 
         Class<?> parameterClass = parameter.getType();
         if (parameterClass.equals(String.class)) {
@@ -26,12 +31,15 @@ public class ParameterValidator {
             Object fieldValue = field.get(value);
             field.setAccessible(false);
 
-            checkValidationAnnotations(field, fieldValue, fieldErrors);
+            if (!field.isAnnotationPresent(RequestParameter.class)) break;
+
+            String fieldName = field.getAnnotation(RequestParameter.class).value();
+            checkValidationAnnotations(field, parameterName + "." + fieldName, fieldValue, fieldErrors);
         }
     }
 
-    private static void checkValidationAnnotations(AnnotatedElement annotatedElement, Object value, FieldErrors fieldErrors) {
-        String fieldName = annotatedElement.getAnnotation(RequestParameter.class).value();
+    private static void checkValidationAnnotations(AnnotatedElement annotatedElement, String fieldName, Object value, FieldErrors fieldErrors) {
+
         if (annotatedElement.isAnnotationPresent(Required.class)) {
             Required requiredAnnotation = annotatedElement.getAnnotation(Required.class);
             validateRequired(value, requiredAnnotation, fieldName, fieldErrors);
@@ -56,9 +64,7 @@ public class ParameterValidator {
         if (value.getClass().equals(String.class)) {
             int stringLength = ((String) value).length();
             if (stringLength < annotation.min() || stringLength > annotation.max()) fieldErrors.addFieldError(fieldName, annotation.message());
-        }
-
-        if (isValidNumber(value.toString())) {
+        } else if (isValidNumber(value.toString())) {
             BigDecimal number = new BigDecimal(value.toString());
             double doubleValue = number.doubleValue();
             if (doubleValue < annotation.min() || doubleValue > annotation.max()) fieldErrors.addFieldError(fieldName, annotation.message());
