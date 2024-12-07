@@ -3,6 +3,7 @@ package mg.tiarintsoa.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import mg.tiarintsoa.annotation.*;
 import mg.tiarintsoa.enumeration.RequestVerb;
+import mg.tiarintsoa.exception.MissingErrorUrlException;
 import mg.tiarintsoa.exception.VerbNotFoundException;
 import mg.tiarintsoa.reflection.Reflect;
 import mg.tiarintsoa.session.WinterSession;
@@ -33,6 +34,14 @@ public class Mapping {
     public void addVerbMapping(RequestVerb verb, Method method, String url) throws Exception {
         if (methods.containsKey(verb)) throw new Exception("The url and verb (" + url + ", " + verb + ") cannot be mapped more than one time");
         methods.put(verb, method);
+    }
+
+    public String getErrorUrl(RequestVerb verb) throws MissingErrorUrlException {
+        if (!methods.get(verb).isAnnotationPresent(ErrorUrl.class))
+            throw new MissingErrorUrlException();
+
+        ErrorUrl errorUrl = methods.get(verb).getAnnotation(ErrorUrl.class);
+        return errorUrl.value();
     }
 
     public boolean isRestAPI(RequestVerb verb) {

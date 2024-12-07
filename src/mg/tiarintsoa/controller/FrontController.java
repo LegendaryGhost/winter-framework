@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import mg.tiarintsoa.enumeration.RequestVerb;
 import mg.tiarintsoa.exception.VerbNotFoundException;
@@ -69,7 +70,10 @@ public class FrontController extends HttpServlet {
         try {
             FieldErrors fieldErrors = new FieldErrors();
             Object responseObject = mapping.executeMethod(req, verb, url, fieldErrors);
-            req.setAttribute("fieldErrors", fieldErrors);
+            if (fieldErrors.hasErrors()) {
+                redirectToErrorUrl(req, resp, mapping.getErrorUrl(verb), fieldErrors);
+                return;
+            }
 
             if (mapping.isRestAPI(verb)) {
                 processRestRequest(resp, responseObject);
@@ -81,6 +85,18 @@ public class FrontController extends HttpServlet {
         } catch (Exception e) {
             throw new ServletException(e);
         }
+    }
+
+    protected void redirectToErrorUrl(HttpServletRequest req, HttpServletResponse resp, String errorUrl, FieldErrors fieldErrors) throws IOException, ServletException {
+        req.setAttribute("fieldErrors", fieldErrors);
+        HttpServletRequest wrappedRequest = new HttpServletRequestWrapper(req) {
+            @Override
+            public String getMethod() {
+                return "GET";
+            }
+        };
+        RequestDispatcher dispatcher = req.getRequestDispatcher(errorUrl);
+        dispatcher.forward(wrappedRequest, resp);
     }
 
     // Method to serve static files
