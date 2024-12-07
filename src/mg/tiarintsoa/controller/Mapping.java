@@ -3,9 +3,11 @@ package mg.tiarintsoa.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import mg.tiarintsoa.annotation.*;
 import mg.tiarintsoa.enumeration.RequestVerb;
+import mg.tiarintsoa.exception.MissingErrorUrlException;
 import mg.tiarintsoa.exception.VerbNotFoundException;
 import mg.tiarintsoa.reflection.Reflect;
 import mg.tiarintsoa.session.WinterSession;
+import mg.tiarintsoa.validation.FieldErrors;
 import mg.tiarintsoa.validation.ParameterValidator;
 
 import java.lang.reflect.Field;
@@ -34,6 +36,14 @@ public class Mapping {
         methods.put(verb, method);
     }
 
+    public String getErrorUrl(RequestVerb verb) throws MissingErrorUrlException {
+        if (!methods.get(verb).isAnnotationPresent(ErrorUrl.class))
+            throw new MissingErrorUrlException();
+
+        ErrorUrl errorUrl = methods.get(verb).getAnnotation(ErrorUrl.class);
+        return errorUrl.value();
+    }
+
     public boolean isRestAPI(RequestVerb verb) {
         return methods.get(verb).isAnnotationPresent(RestEndPoint.class) || controller.isAnnotationPresent(RestController.class);
     }
@@ -55,6 +65,22 @@ public class Mapping {
     }
 
     private Object getValueFromParameterName(HttpServletRequest request, Class<?> parameterClass, String parameterName) throws Exception {
+        if (parameterClass.equals(Integer.class) || parameterClass.equals(int.class)) {
+            try {
+                return Integer.parseInt(request.getParameter(parameterName));
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+
+        if (parameterClass.equals(Double.class) || parameterClass.equals(double.class)) {
+            try {
+                return Double.parseDouble(request.getParameter(parameterName));
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+
         if (parameterClass.equals(String.class)) {
             return request.getParameter(parameterName);
         }
@@ -65,14 +91,11 @@ public class Mapping {
 
             if (field.isAnnotationPresent(RequestParameter.class)) {
                 RequestParameter annotation = field.getAnnotation(RequestParameter.class);
-                parameterSubValue = request.getParameter(parameterName + "." + annotation.value());
+                parameterSubValue = getValueFromParameterName(request, field.getType(), parameterName + "." + annotation.value());
             } else if (field.isAnnotationPresent(RequestFile.class)) {
                 RequestFile annotation = field.getAnnotation(RequestFile.class);
                 parameterSubValue = getPartFromFileName(request, field.getType(), parameterName + "." + annotation.value());
             }
-
-            String conventionSubValue = request.getParameter(parameterName + "." + field.getName());
-            parameterSubValue = conventionSubValue == null ? parameterSubValue : conventionSubValue;
 
             if (parameterSubValue != null) {
                 if (newValue == null) newValue = Reflect.createInstance(parameterClass);
@@ -93,7 +116,7 @@ public class Mapping {
         return new WinterPart(request.getPart(fileName));
     }
 
-    private Object getRequestParameterValue(HttpServletRequest request, Parameter parameter) throws Exception {
+    private Object getRequestParameterValue(HttpServletRequest request, Parameter parameter, FieldErrors fieldErrors) throws Exception {
         Object value;
         Class<?> parameterClass = parameter.getType();
 
@@ -105,6 +128,8 @@ public class Mapping {
             RequestFile requestFile = parameter.getAnnotation(RequestFile.class);
             String fileName = requestFile.value();
             value = getPartFromFileName(request, parameterClass, fileName);
+        } else if (parameterClass.equals(FieldErrors.class)) {
+            value = fieldErrors;
         } else {
             throw new Exception("ETU003057: parameter \"" + parameter.getName() + "\" doesn't have the annotation @RequestParameter or @RequestFile");
         }
@@ -112,7 +137,7 @@ public class Mapping {
         return value;
     }
 
-    public Object executeMethod(HttpServletRequest request, RequestVerb verb, String url) throws Exception {
+    public Object executeMethod(HttpServletRequest request, RequestVerb verb, String url, FieldErrors fieldErrors) throws Exception {
         Method method = methods.get(verb);
         if (method == null) throw new VerbNotFoundException("The URL \"" + url + "\" is not associated with the verb " + verb);
 
@@ -125,8 +150,16 @@ public class Mapping {
 
         for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];
-            parametersValues[i] = getRequestParameterValue(request, parameter);
-            ParameterValidator.validate(parametersValues[i], parameter);
+            parametersValues[i] = getRequestParameterValue(request, parameter, fieldErrors);
+            ParameterValidator.validateParameter(parametersValues[i], parameter, fieldErrors);
+        }
+
+        // Converts the primitive types to their default values after the field validation is processed
+        for (int i = 0; i < parameters.length; i++) {
+            Parameter parameter = parameters[i];
+            if (parametersValues[i] != null) continue;
+            if (parameter.getType().equals(int.class)) parametersValues[i] = 0;
+            if (parameter.getType().equals(double.class)) parametersValues[i] = 0.0;
         }
 
         return method.invoke(controllerInstance, parametersValues);
