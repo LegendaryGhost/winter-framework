@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import mg.tiarintsoa.enumeration.RequestVerb;
 import mg.tiarintsoa.exception.VerbNotFoundException;
+import mg.tiarintsoa.validation.FieldErrors;
 
 import java.io.*;
 import java.net.URLDecoder;
@@ -66,7 +67,10 @@ public class FrontController extends HttpServlet {
         }
 
         try {
-            Object responseObject = mapping.executeMethod(req, verb, url);
+            FieldErrors fieldErrors = new FieldErrors();
+            Object responseObject = mapping.executeMethod(req, verb, url, fieldErrors);
+            req.setAttribute("fieldErrors", fieldErrors);
+
             if (mapping.isRestAPI(verb)) {
                 processRestRequest(resp, responseObject);
             } else {

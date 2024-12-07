@@ -6,6 +6,7 @@ import mg.tiarintsoa.enumeration.RequestVerb;
 import mg.tiarintsoa.exception.VerbNotFoundException;
 import mg.tiarintsoa.reflection.Reflect;
 import mg.tiarintsoa.session.WinterSession;
+import mg.tiarintsoa.validation.FieldErrors;
 import mg.tiarintsoa.validation.ParameterValidator;
 
 import java.lang.reflect.Field;
@@ -93,7 +94,7 @@ public class Mapping {
         return new WinterPart(request.getPart(fileName));
     }
 
-    private Object getRequestParameterValue(HttpServletRequest request, Parameter parameter) throws Exception {
+    private Object getRequestParameterValue(HttpServletRequest request, Parameter parameter, FieldErrors fieldErrors) throws Exception {
         Object value;
         Class<?> parameterClass = parameter.getType();
 
@@ -105,6 +106,8 @@ public class Mapping {
             RequestFile requestFile = parameter.getAnnotation(RequestFile.class);
             String fileName = requestFile.value();
             value = getPartFromFileName(request, parameterClass, fileName);
+        } else if (parameterClass.equals(FieldErrors.class)) {
+            value = fieldErrors;
         } else {
             throw new Exception("ETU003057: parameter \"" + parameter.getName() + "\" doesn't have the annotation @RequestParameter or @RequestFile");
         }
@@ -112,7 +115,7 @@ public class Mapping {
         return value;
     }
 
-    public Object executeMethod(HttpServletRequest request, RequestVerb verb, String url) throws Exception {
+    public Object executeMethod(HttpServletRequest request, RequestVerb verb, String url, FieldErrors fieldErrors) throws Exception {
         Method method = methods.get(verb);
         if (method == null) throw new VerbNotFoundException("The URL \"" + url + "\" is not associated with the verb " + verb);
 
@@ -125,8 +128,8 @@ public class Mapping {
 
         for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];
-            parametersValues[i] = getRequestParameterValue(request, parameter);
-            ParameterValidator.validate(parametersValues[i], parameter);
+            parametersValues[i] = getRequestParameterValue(request, parameter, fieldErrors);
+            ParameterValidator.validate(parametersValues[i], parameter, fieldErrors);
         }
 
         return method.invoke(controllerInstance, parametersValues);
