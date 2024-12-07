@@ -44,7 +44,7 @@ You should replace this value with the package of your project that contains you
 
 ## II - Usage
 
-### 1) Controller and endpoint
+### 1) Controller and endpoints
 
 #### a) Controller and endpoint creation
 
@@ -146,7 +146,6 @@ public class Employee {
 ```
 
 **Controller:**
-
 ```java
 import mg.tiarintsoa.annotation.Controller;
 import mg.tiarintsoa.annotation.UrlMapping;
@@ -328,6 +327,76 @@ public class LoginController {
         ModelView modelView = new ModelView("my-info.jsp");
         modelView.addObject("email", session.get("email"));
         modelView.addObject("password", session.get("password"));
+        return modelView;
+    }
+
+}
+```
+
+### 4) Parameters validation
+
+You can validate the parameters and their fields using the following annotations:
+- @Required( message )
+- @NotBlank( message )
+- @Number( message )
+- @Range( message, min, max ): specifies a range for a string's length or a number's value
+
+Note that you don't have to specify the message values.
+
+You have to specify with the @ErrorUrl annotation where the user should be redirected in case a validation error occurs
+
+**Entity:**
+```java
+import mg.tiarintsoa.annotation.RequestParameter;
+import mg.tiarintsoa.validation.annotation.NotBlank;
+import mg.tiarintsoa.validation.annotation.Required;
+
+public class Employee {
+    @RequestParameter("firstname")
+    @Required( message = "Le prénom est requis")
+    private String firstname;
+
+    @RequestParameter("lastname")
+    @NotBlank( message = "Le nom de famille ne doit pas être vide")
+    private String lastname;
+
+    public Employee() {}
+
+    // ...
+}
+```
+
+**Controller:**
+```java
+package mg.winter.controller;
+
+import mg.tiarintsoa.annotation.*;
+import mg.tiarintsoa.controller.ModelView;
+import mg.tiarintsoa.session.WinterSession;
+import mg.tiarintsoa.validation.annotation.Number;
+import mg.tiarintsoa.validation.annotation.Range;
+import mg.tiarintsoa.validation.annotation.Required;
+import mg.winter.entity.Employee;
+
+@Controller
+public class TestController {
+
+    @UrlMapping("/form")
+    public ModelView form() {
+        return new ModelView("form.jsp");
+    }
+
+    @Get
+    @UrlMapping("/employee")
+    @ErrorUrl("/form")
+    public ModelView employeeGet(
+            @RequestParameter("employee") @Required Employee emp,
+            @RequestParameter("age") @Number @Range(min = 18, max = 120) int age
+    ) {
+        ModelView modelView = new ModelView("employee.jsp");
+        modelView.addObject("emp", emp);
+        modelView.addObject("age", age);
+
         return modelView;
     }
 

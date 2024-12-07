@@ -89,4 +89,4 @@
 - [x] Redirect to the error URL with all the fields' errors
 - [x] Prefill the values the of the form
 - [x] Type casting (integers and doubles)
-- [ ] Update README
+- [x] Update README
