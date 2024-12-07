@@ -77,10 +77,16 @@
 - [x] Static resource display
 
 ## Sprint 13 (Request parameters validation)
-- [ ] Move the @RequestParameter annotation check
-- [ ] Create the necessary annotations
+- [x] Move the @RequestParameter annotation check
+- [x] Create the necessary annotations
   - [x] Required
   - [x] NotBlank
-  - [ ] Range
+  - [x] Range
 - [x] Throw an error when a parameter is not valid
+
+## Sprint 14 (Redirect to an error URL in case the parameters are not validated)
+- [x] Error URL annotation
+- [x] Redirect to the error URL with all the fields' errors
+- [x] Prefill the values the of the form
+- [ ] Type casting (integers and doubles)
 - [ ] Update README

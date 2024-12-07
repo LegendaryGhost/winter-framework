@@ -65,6 +65,22 @@ public class Mapping {
     }
 
     private Object getValueFromParameterName(HttpServletRequest request, Class<?> parameterClass, String parameterName) throws Exception {
+        if (parameterClass.equals(Integer.class) || parameterClass.equals(int.class)) {
+            try {
+                return Integer.parseInt(request.getParameter(parameterName));
+            } catch (NumberFormatException e) {
+                return parameterClass.equals(int.class) ? 0 : null;
+            }
+        }
+
+        if (parameterClass.equals(Double.class) || parameterClass.equals(double.class)) {
+            try {
+                return Double.parseDouble(request.getParameter(parameterName));
+            } catch (NumberFormatException e) {
+                return parameterClass.equals(double.class) ? 0.0 : null;
+            }
+        }
+
         if (parameterClass.equals(String.class)) {
             return request.getParameter(parameterName);
         }
@@ -75,14 +91,11 @@ public class Mapping {
 
             if (field.isAnnotationPresent(RequestParameter.class)) {
                 RequestParameter annotation = field.getAnnotation(RequestParameter.class);
-                parameterSubValue = request.getParameter(parameterName + "." + annotation.value());
+                parameterSubValue = getValueFromParameterName(request, field.getType(), parameterName + "." + annotation.value());
             } else if (field.isAnnotationPresent(RequestFile.class)) {
                 RequestFile annotation = field.getAnnotation(RequestFile.class);
                 parameterSubValue = getPartFromFileName(request, field.getType(), parameterName + "." + annotation.value());
             }
-
-            String conventionSubValue = request.getParameter(parameterName + "." + field.getName());
-            parameterSubValue = conventionSubValue == null ? parameterSubValue : conventionSubValue;
 
             if (parameterSubValue != null) {
                 if (newValue == null) newValue = Reflect.createInstance(parameterClass);
@@ -138,7 +151,7 @@ public class Mapping {
         for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];
             parametersValues[i] = getRequestParameterValue(request, parameter, fieldErrors);
-            ParameterValidator.validate(parametersValues[i], parameter, fieldErrors);
+            ParameterValidator.validateParameter(parametersValues[i], parameter, fieldErrors);
         }
 
         return method.invoke(controllerInstance, parametersValues);

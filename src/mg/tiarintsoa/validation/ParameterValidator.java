@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 
 public class ParameterValidator {
 
-    public static void validate(Object value, Parameter parameter, FieldErrors fieldErrors) throws IllegalAccessException {
+    public static void validateParameter(Object value, Parameter parameter, FieldErrors fieldErrors) throws IllegalAccessException {
 
         if (!parameter.isAnnotationPresent(RequestParameter.class)) return;
 
