@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import mg.tiarintsoa.enumeration.RequestVerb;
+import mg.tiarintsoa.exception.UnauthorisedException;
 import mg.tiarintsoa.exception.VerbNotFoundException;
 import mg.tiarintsoa.validation.FieldErrors;
 
@@ -82,6 +83,8 @@ public class FrontController extends HttpServlet {
             }
         } catch (VerbNotFoundException e) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+        } catch (UnauthorisedException e) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
         } catch (Exception e) {
             throw new ServletException(e);
         }
