@@ -71,15 +71,15 @@ public class TestController {
 
     @UrlMapping("/")
     public ModelView message() {
-	ModelView mw = new ModelView("message.jsp");
-	mw.addObject("message", "Hello world !");
-	return mw;
+        ModelView mw = new ModelView("message.jsp");
+        mw.addObject("message", "Hello world !");
+        return mw;
     }
 
     @UrlMapping("/end-point-2")
     @Post
     public String endPoint2() {
-	return "End point 2";
+	    return "End point 2";
     }
 
     public void notAnEndPoint() {
@@ -113,12 +113,14 @@ import mg.tiarintsoa.controller.ModelView;
 public class TestController {
 
     @UrlMapping("/employee")
-    public ModelView employee(@RequestParameter("firstname") String firstname,
-	    @RequestParameter("lastname") String lastname) {
-	ModelView modelView = new ModelView("employee.jsp");
-	modelView.addObject("firstname", firstname);
-	modelView.addObject("lastname", lastname);
-	return modelView;
+    public ModelView employee(
+	    @RequestParameter("firstname") String firstname,
+	    @RequestParameter("lastname") String lastname
+    ) {
+        ModelView modelView = new ModelView("employee.jsp");
+        modelView.addObject("firstname", firstname);
+        modelView.addObject("lastname", lastname);
+        return modelView;
     }
 
 }
@@ -136,14 +138,14 @@ The objects' field value will be set based on their name and the field name foll
 import mg.tiarintsoa.annotation.RequestParameter;
 
 public class Employee {
+    
     @RequestParameter("firstname")
     private String firstname;
 
     @RequestParameter("lastname")
     private String lastname;
 
-    public Employee() {
-    }
+    public Employee() {}
 
     // ...
 }
@@ -163,9 +165,9 @@ public class TestController {
 
     @UrlMapping("/employee")
     public ModelView employee(@RequestParameter("employee") Employee emp) {
-	ModelView modelView = new ModelView("employee.jsp");
-	modelView.addObject("emp", emp);
-	return modelView;
+        ModelView modelView = new ModelView("employee.jsp");
+        modelView.addObject("emp", emp);
+        return modelView;
     }
 
 }
@@ -177,7 +179,111 @@ public class TestController {
 - If no binding can be applied then the parameter will be set to null or its primitive type's default value.
 - Objects' class must contain an **empty constructor**
 
-#### c) Verb
+#### c) Request file binding
+
+You can receive the file from an HTML form using the **@RequestFile** annotation as a **WinterPart** instance.
+
+```java
+package mg.winter.controller;
+
+import mg.tiarintsoa.annotation.*;
+import mg.tiarintsoa.controller.ModelView;
+import mg.tiarintsoa.controller.WinterPart;
+
+import java.io.IOException;
+
+@Controller
+public class UserController {
+
+    private static final String UPLOAD_DIRECTORY = "uploads/";
+
+    @UrlMapping("/profile-picture")
+    public ModelView index() {
+        return new ModelView("profile-picture-form.jsp");
+    }
+
+    @Post
+    @UrlMapping("/profile-picture")
+    public String upload(@RequestFile("profile-picture") WinterPart part) throws IOException {
+        part.save(UPLOAD_DIRECTORY + part.getSubmittedFileName());
+        return "File uploaded successfully\nSize: " + part.getSize() + "B\nName: " + part.getSubmittedFileName();
+    }
+
+}
+```
+
+You can also receive it within an Object.
+
+**Entity:**
+
+```java
+import mg.tiarintsoa.annotation.RequestFile;
+import mg.tiarintsoa.annotation.RequestParameter;
+import mg.tiarintsoa.controller.WinterPart;
+
+public class User {
+
+    @RequestParameter("firstname")
+    private String firstName;
+
+    @RequestParameter("lastname")
+    private String lastName;
+
+    @RequestFile("profile-picture")
+    private WinterPart part;
+
+    /* Empty constructor, getters and setters */
+
+}
+```
+
+**Controller:**
+
+```java
+package mg.winter.controller;
+
+import mg.tiarintsoa.annotation.*;
+import mg.tiarintsoa.controller.ModelView;
+import mg.tiarintsoa.controller.WinterPart;
+import mg.winter.entity.User;
+
+import java.io.IOException;
+
+@Controller
+public class UserController {
+
+    private static final String UPLOAD_DIRECTORY = "uploads/";
+
+    @UrlMapping("/user")
+    public ModelView userForm() {
+        return new ModelView("user-form.jsp");
+    }
+
+    @Post
+    @UrlMapping("/user")
+    public ModelView insertUser(@RequestParameter("user") User user) throws IOException {
+        ModelView modelView = new ModelView("user.jsp");
+        modelView.addObject("user", user);
+
+        WinterPart part = user.getPart();
+        part.save(UPLOAD_DIRECTORY + part.getSubmittedFileName());
+
+        return modelView;
+    }
+
+}
+```
+
+The WinterPart class contains the following generic methods:
+
+- byte[] getBytes()
+- getSubmittedFileName()
+- InputStream getInputStream()
+- long getSize()
+- boolean isEmpty()
+- void save(String filePath) : saves the file into the static folder **"/static/"**
+
+#### d) Verb
 
 The winter-framework only supports GET and POST verbs for now.
 You can specify it using the @Get or @Post annotation.
@@ -197,14 +303,14 @@ public class TestRestController {
 
     @UrlMapping("/employees")
     public ModelView empList() {
-	ModelView modelView = new ModelView("employees.jsp");
-	List<Employee> employees = new ArrayList<>();
-	employees.add(new Employee("Tiarintsoa", "Mbolatsiory"));
-	employees.add(new Employee("Henintsoa", "Paul"));
-	employees.add(new Employee("Ryan", "Lizka"));
-	modelView.addObject("message", "Here is the employee list");
-	modelView.addObject("employees", employees);
-	return modelView;
+        ModelView modelView = new ModelView("employees.jsp");
+        List<Employee> employees = new ArrayList<>();
+        employees.add(new Employee("Tiarintsoa", "Mbolatsiory"));
+        employees.add(new Employee("Henintsoa", "Paul"));
+        employees.add(new Employee("Ryan", "Lizka"));
+        modelView.addObject("message", "Here is the employee list");
+        modelView.addObject("employees", employees);
+        return modelView;
     }
 
     @Get
@@ -216,7 +322,7 @@ public class TestRestController {
     @Post
     @UrlMapping(value = "/employees/1")
     public Employee empDetailsPost() {
-	return new Employee("Tiarintsoa", "Mbolatsiory");
+	    return new Employee("Tiarintsoa", "Mbolatsiory");
     }
 
 }
@@ -245,19 +351,19 @@ public class TestRestController {
 
     @UrlMapping("/api/employees")
     public ModelView empList() {
-	ModelView modelView = new ModelView();
-	List<Employee> employees = new ArrayList<>();
-	employees.add(new Employee("Tiarintsoa", "Mbolatsiory"));
-	employees.add(new Employee("John", "Doe"));
-	employees.add(new Employee("Jeanne", "Doe"));
-	modelView.addObject("message", "Here is the employee list");
-	modelView.addObject("employees", employees);
-	return modelView;
+        ModelView modelView = new ModelView();
+        List<Employee> employees = new ArrayList<>();
+        employees.add(new Employee("Tiarintsoa", "Mbolatsiory"));
+        employees.add(new Employee("John", "Doe"));
+        employees.add(new Employee("Jeanne", "Doe"));
+        modelView.addObject("message", "Here is the employee list");
+        modelView.addObject("employees", employees);
+        return modelView;
     }
 
     @UrlMapping("/api/employees/1")
     public Employee empDetails() {
-	return new Employee("Tiarintsoa", "Mbolatsiory");
+	    return new Employee("Tiarintsoa", "Mbolatsiory");
     }
 
 }
@@ -276,15 +382,15 @@ public class TestController {
 
     @UrlMapping("/")
     public ModelView message() {
-	ModelView modelView = new ModelView("message.jsp");
-	modelView.addObject("message", "Hello world !");
-	return modelView;
+        ModelView modelView = new ModelView("message.jsp");
+        modelView.addObject("message", "Hello world !");
+        return modelView;
     }
 
     @RestEndPoint
     @UrlMapping("/api/employees/2")
     public Employee empDetails() {
-	return new Employee("Kevin", "Ramaro");
+	    return new Employee("Kevin", "Ramaro");
     }
 }
 ```
@@ -293,7 +399,7 @@ public class TestController {
 
 To use the session, you can add a field of type **WinterSession** in your controller.
 It will be automatically detected and injected by the winter framework.
-The **WinterSession** class contains 3 generic method:
+The **WinterSession** class contains 3 generic methods:
 
 - void add(String key, Object value)
 - Object get(String key)
@@ -351,7 +457,7 @@ You can validate the parameters and their fields using the following annotations
 
 Note that you don't have to specify the message values.
 
-You have to specify with the @ErrorUrl annotation where the user should be redirected in case a validation error occurs
+You have to specify with the **@ErrorUrl** annotation where the user should be redirected in case a validation error occurs
 
 **Entity:**
 
