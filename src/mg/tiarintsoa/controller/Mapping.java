@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import mg.tiarintsoa.annotation.*;
 import mg.tiarintsoa.enumeration.RequestVerb;
 import mg.tiarintsoa.exception.MissingErrorUrlException;
+import mg.tiarintsoa.exception.UnauthorisedException;
 import mg.tiarintsoa.exception.VerbNotFoundException;
 import mg.tiarintsoa.reflection.Reflect;
 import mg.tiarintsoa.session.WinterSession;
@@ -140,6 +141,11 @@ public class Mapping {
     public Object executeMethod(HttpServletRequest request, RequestVerb verb, String url, FieldErrors fieldErrors) throws Exception {
         Method method = methods.get(verb);
         if (method == null) throw new VerbNotFoundException("The URL \"" + url + "\" is not associated with the verb " + verb);
+
+        if(method.isAnnotationPresent(Authenticated.class)) {
+            Authenticated authenticated = method.getAnnotation(Authenticated.class);
+            if (!Authenticator.isAuthorised(request, authenticated)) throw new UnauthorisedException("You are not allowed to access this URL");
+        }
 
         Object controllerInstance = getControllerInstance();
         Parameter[] parameters = method.getParameters();

@@ -90,3 +90,7 @@
 - [x] Prefill the values the of the form
 - [x] Type casting (integers and doubles)
 - [x] Update README
+
+## Sprint 15 (Authentication)
+- [x] Authenticated annotation
+- [x] Preprocess request directed toward annotated URLs

@@ -8,8 +8,8 @@ A personal web MVC framework built on top of the Java servlet API
 
 2 - Map all url("/") to the **mg.tiarintsoa.controller.FrontController** class in the **web.xml** file.
 
-3 - Don't forget to set an init parameter to precise which package of your project should be scanned by the winter-framework 
-for **Controllers**
+3 - Don't forget to set an init parameter to precise which package of your project should be scanned by the
+winter-framework for **Controllers**
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -18,7 +18,7 @@ for **Controllers**
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
                              http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
          version="4.0">
-    
+
     <!-- Servlet naming -->
     <servlet>
         <servlet-name>FrontController</servlet-name>
@@ -28,7 +28,7 @@ for **Controllers**
             <param-value>com.example.controller</param-value>
         </init-param>
     </servlet>
-    
+
     <!-- Servlet mapping -->
     <servlet-mapping>
         <servlet-name>FrontController</servlet-name>
@@ -53,7 +53,7 @@ Then annotate the class with the **@Controller** annotation.
 
 Create an endpoint by annotating a controller's method with the **@UrlMapping** annotation.
 The value of the annotation will be the URL mapped to it.
-By default, the verb of the endpoint will be the GET verb, but you can specify it with the @Get or @Post annotation. 
+By default, the verb of the endpoint will be the GET verb, but you can specify it with the @Get or @Post annotation.
 Each endpoint must return a String representing the response's body or a ModelView.
 The URL in the ModelView represents the URL to the view and the data it contains
 will be mapped into an HashMap of the attributes which will be bind to the request.
@@ -71,15 +71,15 @@ public class TestController {
 
     @UrlMapping("/")
     public ModelView message() {
-        ModelView mw = new ModelView("message.jsp");
-        mw.addObject("message", "Hello world !");
-        return mw;
+	ModelView mw = new ModelView("message.jsp");
+	mw.addObject("message", "Hello world !");
+	return mw;
     }
 
     @UrlMapping("/end-point-2")
     @Post
     public String endPoint2() {
-        return "End point 2";
+	return "End point 2";
     }
 
     public void notAnEndPoint() {
@@ -89,8 +89,9 @@ public class TestController {
 ```
 
 **Warning:**
+
 - Don't assign a URL and verb pair to more than one method.
-- Controller's method should only return a String or a ModelView 
+- Controller's method should only return a String or a ModelView
 
 #### b) Parameters binding
 
@@ -112,40 +113,44 @@ import mg.tiarintsoa.controller.ModelView;
 public class TestController {
 
     @UrlMapping("/employee")
-    public ModelView employee(@RequestParameter("firstname") String firstname, @RequestParameter("lastname") String lastname) {
-        ModelView modelView = new ModelView("employee.jsp");
-        modelView.addObject("firstname", firstname);
-        modelView.addObject("lastname", lastname);
-        return modelView;
+    public ModelView employee(@RequestParameter("firstname") String firstname,
+	    @RequestParameter("lastname") String lastname) {
+	ModelView modelView = new ModelView("employee.jsp");
+	modelView.addObject("firstname", firstname);
+	modelView.addObject("lastname", lastname);
+	return modelView;
     }
 
 }
 ```
 
 Request parameters binding also works with objects.
-The objects' field value will be set based on their name and the field name following this pattern : **"\<parameterName>.\<fieldName>"**. 
-Here is an example for more clarity:
+The objects' field value will be set based on their name and the field name following this pattern : **"\<parameterName>
+.\<fieldName>"**. Here is an example for more clarity:
 
 **URL**: "/employee?employee.firstname=John&employee.lastname=Doe"
 
 **Entity:**
+
 ```java
 import mg.tiarintsoa.annotation.RequestParameter;
 
 public class Employee {
     @RequestParameter("firstname")
     private String firstname;
-    
+
     @RequestParameter("lastname")
     private String lastname;
 
-    public Employee() {}
+    public Employee() {
+    }
 
     // ...
 }
 ```
 
 **Controller:**
+
 ```java
 import mg.tiarintsoa.annotation.Controller;
 import mg.tiarintsoa.annotation.UrlMapping;
@@ -158,15 +163,16 @@ public class TestController {
 
     @UrlMapping("/employee")
     public ModelView employee(@RequestParameter("employee") Employee emp) {
-        ModelView modelView = new ModelView("employee.jsp");
-        modelView.addObject("emp", emp);
-        return modelView;
+	ModelView modelView = new ModelView("employee.jsp");
+	modelView.addObject("emp", emp);
+	return modelView;
     }
 
 }
 ```
 
 **NB**:
+
 - Parameter binding only supports String, int/Integer, double/Double or Object having fields of the precedent type.
 - If no binding can be applied then the parameter will be set to null or its primitive type's default value.
 - Objects' class must contain an **empty constructor**
@@ -191,26 +197,26 @@ public class TestRestController {
 
     @UrlMapping("/employees")
     public ModelView empList() {
-        ModelView modelView = new ModelView("employees.jsp");
-        List<Employee> employees = new ArrayList<>();
-        employees.add(new Employee("Tiarintsoa", "Mbolatsiory"));
-        employees.add(new Employee("Henintsoa", "Paul"));
-        employees.add(new Employee("Ryan", "Lizka"));
-        modelView.addObject("message", "Here is the employee list");
-        modelView.addObject("employees", employees);
-        return modelView;
+	ModelView modelView = new ModelView("employees.jsp");
+	List<Employee> employees = new ArrayList<>();
+	employees.add(new Employee("Tiarintsoa", "Mbolatsiory"));
+	employees.add(new Employee("Henintsoa", "Paul"));
+	employees.add(new Employee("Ryan", "Lizka"));
+	modelView.addObject("message", "Here is the employee list");
+	modelView.addObject("employees", employees);
+	return modelView;
     }
 
     @Get
     @UrlMapping(value = "/employees/1")
     public Employee empDetails() {
-        return new Employee("Tiarintsoa", "Mbolatsiory");
+	return new Employee("Tiarintsoa", "Mbolatsiory");
     }
 
     @Post
     @UrlMapping(value = "/employees/1")
     public Employee empDetailsPost() {
-        return new Employee("Tiarintsoa", "Mbolatsiory");
+	return new Employee("Tiarintsoa", "Mbolatsiory");
     }
 
 }
@@ -229,6 +235,7 @@ import mg.tiarintsoa.annotation.UrlMapping;
 import mg.tiarintsoa.annotation.RestController;
 import mg.tiarintsoa.controller.ModelView;
 import mg.winter.entity.Employee;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -238,19 +245,19 @@ public class TestRestController {
 
     @UrlMapping("/api/employees")
     public ModelView empList() {
-        ModelView modelView = new ModelView();
-        List<Employee> employees = new ArrayList<>();
-        employees.add(new Employee("Tiarintsoa", "Mbolatsiory"));
-        employees.add(new Employee("John", "Doe"));
-        employees.add(new Employee("Jeanne", "Doe"));
-        modelView.addObject("message", "Here is the employee list");
-        modelView.addObject("employees", employees);
-        return modelView;
+	ModelView modelView = new ModelView();
+	List<Employee> employees = new ArrayList<>();
+	employees.add(new Employee("Tiarintsoa", "Mbolatsiory"));
+	employees.add(new Employee("John", "Doe"));
+	employees.add(new Employee("Jeanne", "Doe"));
+	modelView.addObject("message", "Here is the employee list");
+	modelView.addObject("employees", employees);
+	return modelView;
     }
 
     @UrlMapping("/api/employees/1")
     public Employee empDetails() {
-        return new Employee("Tiarintsoa", "Mbolatsiory");
+	return new Employee("Tiarintsoa", "Mbolatsiory");
     }
 
 }
@@ -269,15 +276,15 @@ public class TestController {
 
     @UrlMapping("/")
     public ModelView message() {
-        ModelView modelView = new ModelView("message.jsp");
-        modelView.addObject("message", "Hello world !");
-        return modelView;
+	ModelView modelView = new ModelView("message.jsp");
+	modelView.addObject("message", "Hello world !");
+	return modelView;
     }
 
     @RestEndPoint
     @UrlMapping("/api/employees/2")
     public Employee empDetails() {
-        return new Employee("Kevin", "Ramaro");
+	return new Employee("Kevin", "Ramaro");
     }
 }
 ```
@@ -316,18 +323,18 @@ public class LoginController {
     @UrlMapping("/login")
     @Post
     public ModelView login(@RequestParameter("email") String email, @RequestParameter("password") String password) {
-        session.add("email", email);
-        session.add("password", password);
+	session.add("email", email);
+	session.add("password", password);
 
-        return new ModelView("home.jsp");
+	return new ModelView("home.jsp");
     }
 
     @UrlMapping("/my-info")
     public ModelView myInfo() {
-        ModelView modelView = new ModelView("my-info.jsp");
-        modelView.addObject("email", session.get("email"));
-        modelView.addObject("password", session.get("password"));
-        return modelView;
+	ModelView modelView = new ModelView("my-info.jsp");
+	modelView.addObject("email", session.get("email"));
+	modelView.addObject("password", session.get("password"));
+	return modelView;
     }
 
 }
@@ -336,6 +343,7 @@ public class LoginController {
 ### 4) Parameters validation
 
 You can validate the parameters and their fields using the following annotations:
+
 - @Required( message )
 - @NotBlank( message )
 - @Number( message )
@@ -346,6 +354,7 @@ Note that you don't have to specify the message values.
 You have to specify with the @ErrorUrl annotation where the user should be redirected in case a validation error occurs
 
 **Entity:**
+
 ```java
 import mg.tiarintsoa.annotation.RequestParameter;
 import mg.tiarintsoa.validation.annotation.NotBlank;
@@ -353,20 +362,22 @@ import mg.tiarintsoa.validation.annotation.Required;
 
 public class Employee {
     @RequestParameter("firstname")
-    @Required( message = "Le prénom est requis")
+    @Required(message = "Le prénom est requis")
     private String firstname;
 
     @RequestParameter("lastname")
-    @NotBlank( message = "Le nom de famille ne doit pas être vide")
+    @NotBlank(message = "Le nom de famille ne doit pas être vide")
     private String lastname;
 
-    public Employee() {}
+    public Employee() {
+    }
 
     // ...
 }
 ```
 
 **Controller:**
+
 ```java
 package mg.winter.controller;
 
@@ -383,22 +394,24 @@ public class TestController {
 
     @UrlMapping("/form")
     public ModelView form() {
-        return new ModelView("form.jsp");
+	return new ModelView("form.jsp");
     }
 
     @Get
     @UrlMapping("/employee")
     @ErrorUrl("/form")
-    public ModelView employeeGet(
-            @RequestParameter("employee") @Required Employee emp,
-            @RequestParameter("age") @Number @Range(min = 18, max = 120) int age
-    ) {
-        ModelView modelView = new ModelView("employee.jsp");
-        modelView.addObject("emp", emp);
-        modelView.addObject("age", age);
+    public ModelView employeeGet(@RequestParameter("employee") @Required Employee emp,
+	    @RequestParameter("age") @Number @Range(min = 18, max = 120) int age) {
+	ModelView modelView = new ModelView("employee.jsp");
+	modelView.addObject("emp", emp);
+	modelView.addObject("age", age);
 
-        return modelView;
+	return modelView;
     }
 
 }
 ```
+
+### 5) Authentication
+
+[//]: # (TODO: documentation)
