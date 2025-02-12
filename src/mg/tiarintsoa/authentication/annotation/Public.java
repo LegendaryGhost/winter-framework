@@ -1,4 +1,4 @@
-package mg.tiarintsoa.annotation;
+package mg.tiarintsoa.authentication.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

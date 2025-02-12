@@ -1,8 +1,9 @@
-package mg.tiarintsoa.controller;
+package mg.tiarintsoa.authentication;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import mg.tiarintsoa.annotation.Authenticated;
+import mg.tiarintsoa.authentication.annotation.Authenticated;
+import mg.tiarintsoa.controller.FrontController;
 
 import java.util.Arrays;
 
