@@ -50,7 +50,5 @@ public class WinterPart {
 
         // Write the file content to the specified path
         Files.write(path, getBytes());
-
-        System.out.println("File saved to: " + path.toAbsolutePath());
     }
 }

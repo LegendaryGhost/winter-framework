@@ -2,6 +2,9 @@ package mg.tiarintsoa.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import mg.tiarintsoa.annotation.*;
+import mg.tiarintsoa.authentication.Authenticator;
+import mg.tiarintsoa.authentication.annotation.Authenticated;
+import mg.tiarintsoa.authentication.annotation.Public;
 import mg.tiarintsoa.enumeration.RequestVerb;
 import mg.tiarintsoa.exception.MissingErrorUrlException;
 import mg.tiarintsoa.exception.UnauthorisedException;
@@ -141,6 +144,15 @@ public class Mapping {
     public Object executeMethod(HttpServletRequest request, RequestVerb verb, String url, FieldErrors fieldErrors) throws Exception {
         Method method = methods.get(verb);
         if (method == null) throw new VerbNotFoundException("The URL \"" + url + "\" is not associated with the verb " + verb);
+
+        if (
+            controller.isAnnotationPresent(Authenticated.class)
+                && !method.isAnnotationPresent(Public.class)
+                && !method.isAnnotationPresent(Authenticated.class)
+        ) {
+            Authenticated authenticated = controller.getAnnotation(Authenticated.class);
+            if (!Authenticator.isAuthorised(request, authenticated)) throw new UnauthorisedException("You are not allowed to access this URL");
+        }
 
         if(method.isAnnotationPresent(Authenticated.class)) {
             Authenticated authenticated = method.getAnnotation(Authenticated.class);

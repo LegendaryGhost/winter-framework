@@ -94,3 +94,7 @@
 ## Sprint 15 (Authentication)
 - [x] Authenticated annotation
 - [x] Preprocess request directed toward annotated URLs
+
+## Sprint 16 (Controller based authentication)
+- [x] Public annotation
+- [x] Controller authentication handling
