@@ -142,6 +142,15 @@ public class Mapping {
         Method method = methods.get(verb);
         if (method == null) throw new VerbNotFoundException("The URL \"" + url + "\" is not associated with the verb " + verb);
 
+        if (
+            controller.isAnnotationPresent(Authenticated.class)
+                && !method.isAnnotationPresent(Public.class)
+                && !method.isAnnotationPresent(Authenticated.class)
+        ) {
+            Authenticated authenticated = controller.getAnnotation(Authenticated.class);
+            if (!Authenticator.isAuthorised(request, authenticated)) throw new UnauthorisedException("You are not allowed to access this URL");
+        }
+
         if(method.isAnnotationPresent(Authenticated.class)) {
             Authenticated authenticated = method.getAnnotation(Authenticated.class);
             if (!Authenticator.isAuthorised(request, authenticated)) throw new UnauthorisedException("You are not allowed to access this URL");
