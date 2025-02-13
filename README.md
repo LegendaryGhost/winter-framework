@@ -6,7 +6,7 @@ A personal web MVC framework built on top of the Java servlet API
 
 1 - Download the **winter-framework.jar** file and add it to the project libraries
 
-2 - Map all url("/") to the **mg.tiarintsoa.controller.FrontController** class in the **web.xml** file.
+2 - Map all url("/") to the **controller.com.tiarintsoa.FrontController** class in the **web.xml** file.
 
 3 - Don't forget to set an init parameter to precise which package of your project should be scanned by the
 winter-framework for **Controllers**
@@ -22,7 +22,7 @@ winter-framework for **Controllers**
     <!-- Servlet naming -->
     <servlet>
         <servlet-name>FrontController</servlet-name>
-        <servlet-class>mg.tiarintsoa.controller.FrontController</servlet-class>
+        <servlet-class>com.tiarintsoa.FrontController</servlet-class>
         <init-param>
             <param-name>controllers_package</param-name>
             <param-value>com.example.controller</param-value>
@@ -61,10 +61,10 @@ will be mapped into an HashMap of the attributes which will be bind to the reque
 Here is an example:
 
 ```java
-import mg.tiarintsoa.annotation.Controller;
-import mg.tiarintsoa.annotation.Post;
-import mg.tiarintsoa.annotation.UrlMapping;
-import mg.tiarintsoa.controller.ModelView;
+import com.tiarintsoa.Controller;
+import com.tiarintsoa.Post;
+import com.tiarintsoa.UrlMapping;
+import com.tiarintsoa.ModelView;
 
 @Controller
 public class TestController {
@@ -91,10 +91,10 @@ public class TestController {
 You can add a URL prefix by using the **@UrlMapping** annotation on the controller class.
 
 ```java
-import mg.tiarintsoa.annotation.Controller;
-import mg.tiarintsoa.annotation.Post;
-import mg.tiarintsoa.annotation.UrlMapping;
-import mg.tiarintsoa.controller.ModelView;
+import com.tiarintsoa.Controller;
+import com.tiarintsoa.Post;
+import com.tiarintsoa.UrlMapping;
+import com.tiarintsoa.ModelView;
 
 @Controller
 @UrlMapping("/employees")
@@ -104,7 +104,7 @@ public class EmployeeController {
     public ModelView message() {
         ModelView mw = new ModelView("employeeList.jsp");
         mw.addObject(
-		    "employees",
+            "employees",
             employeeRepository.findAll() // Retrieve the employee list from the database
         );
         return mw;
@@ -135,18 +135,18 @@ Here is an example:
 **Controller:**
 
 ```java
-import mg.tiarintsoa.annotation.Controller;
-import mg.tiarintsoa.annotation.UrlMapping;
-import mg.tiarintsoa.annotation.RequestParameter;
-import mg.tiarintsoa.controller.ModelView;
+import com.tiarintsoa.Controller;
+import com.tiarintsoa.UrlMapping;
+import com.tiarintsoa.RequestParameter;
+import com.tiarintsoa.ModelView;
 
 @Controller
 public class TestController {
 
     @UrlMapping("/employee")
     public ModelView employee(
-	    @RequestParameter("firstname") String firstname,
-	    @RequestParameter("lastname") String lastname
+            @RequestParameter("firstname") String firstname,
+            @RequestParameter("lastname") String lastname
     ) {
         ModelView modelView = new ModelView("employee.jsp");
         modelView.addObject("firstname", firstname);
@@ -166,17 +166,18 @@ The objects' field value will be set based on their name and the field name foll
 **Entity:**
 
 ```java
-import mg.tiarintsoa.annotation.RequestParameter;
+import com.tiarintsoa.RequestParameter;
 
 public class Employee {
-    
+
     @RequestParameter("firstname")
     private String firstname;
 
     @RequestParameter("lastname")
     private String lastname;
 
-    public Employee() {}
+    public Employee() {
+    }
 
     // ...
 }
@@ -185,10 +186,10 @@ public class Employee {
 **Controller:**
 
 ```java
-import mg.tiarintsoa.annotation.Controller;
-import mg.tiarintsoa.annotation.UrlMapping;
-import mg.tiarintsoa.annotation.RequestParameter;
-import mg.tiarintsoa.controller.ModelView;
+import com.tiarintsoa.Controller;
+import com.tiarintsoa.UrlMapping;
+import com.tiarintsoa.RequestParameter;
+import com.tiarintsoa.ModelView;
 import mg.winter.entity.Employee;
 
 @Controller
@@ -217,9 +218,12 @@ You can receive the file from an HTML form using the **@RequestFile** annotation
 ```java
 package mg.winter.controller;
 
-import mg.tiarintsoa.annotation.*;
-import mg.tiarintsoa.controller.ModelView;
-import mg.tiarintsoa.controller.WinterPart;
+import com.tiarintsoa.annotation.Controller;
+import com.tiarintsoa.annotation.Post;
+import com.tiarintsoa.annotation.RequestFile;
+import com.tiarintsoa.annotation.UrlMapping;
+import com.tiarintsoa.ModelView;
+import com.tiarintsoa.WinterPart;
 
 import java.io.IOException;
 
@@ -230,7 +234,7 @@ public class UserController {
 
     @UrlMapping("/profile-picture")
     public ModelView index() {
-        return new ModelView("profile-picture-form.jsp");
+	    return new ModelView("profile-picture-form.jsp");
     }
 
     @Post
@@ -248,9 +252,9 @@ You can also receive it within an Object.
 **Entity:**
 
 ```java
-import mg.tiarintsoa.annotation.RequestFile;
-import mg.tiarintsoa.annotation.RequestParameter;
-import mg.tiarintsoa.controller.WinterPart;
+import com.tiarintsoa.RequestFile;
+import com.tiarintsoa.RequestParameter;
+import com.tiarintsoa.WinterPart;
 
 public class User {
 
@@ -273,9 +277,12 @@ public class User {
 ```java
 package mg.winter.controller;
 
-import mg.tiarintsoa.annotation.*;
-import mg.tiarintsoa.controller.ModelView;
-import mg.tiarintsoa.controller.WinterPart;
+import com.tiarintsoa.annotation.Controller;
+import com.tiarintsoa.annotation.Post;
+import com.tiarintsoa.annotation.RequestParameter;
+import com.tiarintsoa.annotation.UrlMapping;
+import com.tiarintsoa.ModelView;
+import com.tiarintsoa.WinterPart;
 import mg.winter.entity.User;
 
 import java.io.IOException;
@@ -287,7 +294,7 @@ public class UserController {
 
     @UrlMapping("/user")
     public ModelView userForm() {
-        return new ModelView("user-form.jsp");
+	    return new ModelView("user-form.jsp");
     }
 
     @Post
@@ -295,10 +302,10 @@ public class UserController {
     public ModelView insertUser(@RequestParameter("user") User user) throws IOException {
         ModelView modelView = new ModelView("user.jsp");
         modelView.addObject("user", user);
-
+    
         WinterPart part = user.getPart();
         part.save(UPLOAD_DIRECTORY + part.getSubmittedFileName());
-
+    
         return modelView;
     }
 
@@ -321,9 +328,11 @@ You can specify it using the @Get or @Post annotation.
 If no verb is specified, the GET verb will be applied by default.
 
 ```java
-import mg.tiarintsoa.annotation.*;
-import mg.tiarintsoa.controller.ModelView;
-import mg.tiarintsoa.enumeration.RequestVerb;
+import com.tiarintsoa.annotation.Controller;
+import com.tiarintsoa.annotation.Get;
+import com.tiarintsoa.annotation.Post;
+import com.tiarintsoa.annotation.UrlMapping;
+import com.tiarintsoa.ModelView;
 import mg.winter.entity.Employee;
 
 import java.util.ArrayList;
@@ -347,7 +356,7 @@ public class TestRestController {
     @Get
     @UrlMapping(value = "/employees/1")
     public Employee empDetails() {
-	return new Employee("Tiarintsoa", "Mbolatsiory");
+	    return new Employee("Tiarintsoa", "Mbolatsiory");
     }
 
     @Post
@@ -367,10 +376,10 @@ If the return value is an instance of **ModelView** then the view will be ignore
 its **data** attribute will be the response body instead.
 
 ```java
-import mg.tiarintsoa.annotation.Controller;
-import mg.tiarintsoa.annotation.UrlMapping;
-import mg.tiarintsoa.annotation.RestController;
-import mg.tiarintsoa.controller.ModelView;
+import com.tiarintsoa.Controller;
+import com.tiarintsoa.UrlMapping;
+import com.tiarintsoa.RestController;
+import com.tiarintsoa.ModelView;
 import mg.winter.entity.Employee;
 
 import java.util.ArrayList;
@@ -382,7 +391,7 @@ public class TestRestController {
 
     @UrlMapping("/api/employees")
     public ModelView empList() {
-        ModelView modelView = new ModelView();
+	    ModelView modelView = new ModelView();
         List<Employee> employees = new ArrayList<>();
         employees.add(new Employee("Tiarintsoa", "Mbolatsiory"));
         employees.add(new Employee("John", "Doe"));
@@ -404,9 +413,9 @@ You can also annotate a single end point in a controller
 
 ```java
 
-import mg.tiarintsoa.annotation.UrlMapping;
-import mg.tiarintsoa.annotation.RestEndPoint;
-import mg.tiarintsoa.controller.ModelView;
+import com.tiarintsoa.UrlMapping;
+import com.tiarintsoa.RestEndPoint;
+import com.tiarintsoa.ModelView;
 import mg.winter.entity.Employee;
 
 public class TestController {
@@ -439,12 +448,12 @@ The **WinterSession** class contains 3 generic methods:
 Here is a use case example:
 
 ```java
-import mg.tiarintsoa.annotation.Controller;
-import mg.tiarintsoa.annotation.Post;
-import mg.tiarintsoa.annotation.UrlMapping;
-import mg.tiarintsoa.annotation.RequestParameter;
-import mg.tiarintsoa.controller.ModelView;
-import mg.tiarintsoa.session.WinterSession;
+import com.tiarintsoa.Controller;
+import com.tiarintsoa.Post;
+import com.tiarintsoa.UrlMapping;
+import com.tiarintsoa.RequestParameter;
+import com.tiarintsoa.ModelView;
+import com.tiarintsoa.WinterSession;
 
 @Controller
 public class LoginController {
@@ -459,19 +468,22 @@ public class LoginController {
      */
     @UrlMapping("/login")
     @Post
-    public ModelView login(@RequestParameter("email") String email, @RequestParameter("password") String password) {
-	session.add("email", email);
-	session.add("password", password);
-
-	return new ModelView("home.jsp");
+    public ModelView login(
+            @RequestParameter("email") String email,
+            @RequestParameter("password") String password
+    ) {
+        session.add("email", email);
+        session.add("password", password);
+    
+        return new ModelView("home.jsp");
     }
 
     @UrlMapping("/my-info")
     public ModelView myInfo() {
-	ModelView modelView = new ModelView("my-info.jsp");
-	modelView.addObject("email", session.get("email"));
-	modelView.addObject("password", session.get("password"));
-	return modelView;
+        ModelView modelView = new ModelView("my-info.jsp");
+        modelView.addObject("email", session.get("email"));
+        modelView.addObject("password", session.get("password"));
+        return modelView;
     }
 
 }
@@ -493,11 +505,12 @@ You have to specify with the **@ErrorUrl** annotation where the user should be r
 **Entity:**
 
 ```java
-import mg.tiarintsoa.annotation.RequestParameter;
-import mg.tiarintsoa.validation.annotation.NotBlank;
-import mg.tiarintsoa.validation.annotation.Required;
+import com.tiarintsoa.RequestParameter;
+import com.tiarintsoa.NotBlank;
+import com.tiarintsoa.Required;
 
 public class Employee {
+    
     @RequestParameter("firstname")
     @Required(message = "Le prénom est requis")
     private String firstname;
@@ -518,11 +531,11 @@ public class Employee {
 ```java
 package mg.winter.controller;
 
-import mg.tiarintsoa.annotation.*;
-import mg.tiarintsoa.controller.ModelView;
-import mg.tiarintsoa.validation.annotation.Number;
-import mg.tiarintsoa.validation.annotation.Range;
-import mg.tiarintsoa.validation.annotation.Required;
+import com.tiarintsoa.annotation.*;
+import com.tiarintsoa.ModelView;
+import com.tiarintsoa.Number;
+import com.tiarintsoa.Range;
+import com.tiarintsoa.Required;
 import mg.winter.entity.Employee;
 
 @Controller
@@ -530,19 +543,21 @@ public class TestController {
 
     @UrlMapping("/form")
     public ModelView form() {
-	return new ModelView("form.jsp");
+	    return new ModelView("form.jsp");
     }
 
     @Get
     @UrlMapping("/employee")
     @ErrorUrl("/form")
-    public ModelView employeeGet(@RequestParameter("employee") @Required Employee emp,
-	    @RequestParameter("age") @Number @Range(min = 18, max = 120) int age) {
-	ModelView modelView = new ModelView("employee.jsp");
-	modelView.addObject("emp", emp);
-	modelView.addObject("age", age);
-
-	return modelView;
+    public ModelView employeeGet(
+            @RequestParameter("employee") @Required Employee emp,
+	        @RequestParameter("age") @Number @Range(min = 18, max = 120) int age
+    ) {
+        ModelView modelView = new ModelView("employee.jsp");
+        modelView.addObject("emp", emp);
+        modelView.addObject("age", age);
+    
+        return modelView;
     }
 
 }
@@ -571,7 +586,7 @@ within the xml configuration file like this:
     <!-- Servlet naming -->
     <servlet>
         <servlet-name>FrontController</servlet-name>
-        <servlet-class>mg.tiarintsoa.controller.FrontController</servlet-class>
+        <servlet-class>com.tiarintsoa.FrontController</servlet-class>
         <init-param>
             <param-name>controllers_package</param-name>
             <param-value>com.example.controller</param-value>
@@ -598,10 +613,13 @@ within the xml configuration file like this:
 To restrict the access to a URL to only connected user, you can use the **@Authenticated** annotation.
 
 ```java
-import mg.tiarintsoa.annotation.*;
-import mg.tiarintsoa.authentication.annotation.Authenticated;
-import mg.tiarintsoa.controller.ModelView;
-import mg.tiarintsoa.session.WinterSession;
+import com.tiarintsoa.annotation.Controller;
+import com.tiarintsoa.annotation.Post;
+import com.tiarintsoa.annotation.RequestParameter;
+import com.tiarintsoa.annotation.UrlMapping;
+import com.tiarintsoa.Authenticated;
+import com.tiarintsoa.ModelView;
+import com.tiarintsoa.WinterSession;
 import mg.winter.request.LoginCredentials;
 
 @Controller
@@ -616,7 +634,10 @@ public class AuthenticationController {
 
     @UrlMapping("/login")
     @Post
-    public ModelView login(@RequestParameter("credentials") LoginCredentials credentials, @RequestParameter("role") String role) {
+    public ModelView login(
+            @RequestParameter("credentials") LoginCredentials credentials,
+    	    @RequestParameter("role") String role
+    ) {
         session.add("authenticated", true);
         session.add("role", role);
         session.add("email", credentials.getEmail());
@@ -639,9 +660,10 @@ public class AuthenticationController {
 If only a some type of users can access a URL, add the authorized role in the **@Authenticated** annotation.
 
 ```java
-import mg.tiarintsoa.annotation.*;
-import mg.tiarintsoa.authentication.annotation.Authenticated;
-import mg.tiarintsoa.controller.ModelView;
+import com.tiarintsoa.annotation.Controller;
+import com.tiarintsoa.annotation.UrlMapping;
+import com.tiarintsoa.Authenticated;
+import com.tiarintsoa.ModelView;
 
 @Controller
 public class AuthenticationController {
@@ -649,9 +671,9 @@ public class AuthenticationController {
     /* ... */
 
     @UrlMapping("/my-info")
-    @Authenticated(roles = {"admin", "manager", "director"})
+    @Authenticated(roles = { "admin", "manager", "director" })
     public ModelView myInfo() {
-        /* ... */
+	    /* ... */
     }
 
 }
@@ -661,10 +683,14 @@ You can also protect an entire controller and make some method available
 to everyone using the **@Public** annotation.
 
 ```java
-import mg.tiarintsoa.annotation.*;
-import mg.tiarintsoa.authentication.annotation.*;
-import mg.tiarintsoa.controller.ModelView;
-import mg.tiarintsoa.session.WinterSession;
+import com.tiarintsoa.annotation.Controller;
+import com.tiarintsoa.annotation.Post;
+import com.tiarintsoa.annotation.RequestParameter;
+import com.tiarintsoa.annotation.UrlMapping;
+import com.tiarintsoa.authentication.annotation.Authenticated;
+import com.tiarintsoa.authentication.annotation.Public;
+import com.tiarintsoa.ModelView;
+import com.tiarintsoa.WinterSession;
 import mg.winter.request.LoginCredentials;
 
 @Controller
@@ -682,7 +708,10 @@ public class AuthenticationController {
     @UrlMapping("/login")
     @Post
     @Public
-    public ModelView login(@RequestParameter("credentials") LoginCredentials credentials, @RequestParameter("role") String role) {
+    public ModelView login(
+            @RequestParameter("credentials") LoginCredentials credentials,
+	        @RequestParameter("role") String role
+    ) {
         session.add("authenticated", true);
         session.add("role", role);
         session.add("email", credentials.getEmail());
