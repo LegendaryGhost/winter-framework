@@ -88,6 +88,37 @@ public class TestController {
 }
 ```
 
+You can add a URL prefix by using the **@UrlMapping** annotation on the controller class.
+
+```java
+import mg.tiarintsoa.annotation.Controller;
+import mg.tiarintsoa.annotation.Post;
+import mg.tiarintsoa.annotation.UrlMapping;
+import mg.tiarintsoa.controller.ModelView;
+
+@Controller
+@UrlMapping("/employees")
+public class EmployeeController {
+
+    @UrlMapping
+    public ModelView message() {
+        ModelView mw = new ModelView("employeeList.jsp");
+        mw.addObject(
+		    "employees",
+            employeeRepository.findAll() // Retrieve the employee list from the database
+        );
+        return mw;
+    }
+
+    @UrlMapping("/add")
+    @Post
+    public ModelView addForm() {
+	    return new ModelView("employeeForm.jsp");
+    }
+
+}
+```
+
 **Warning:**
 
 - Don't assign a URL and verb pair to more than one method.

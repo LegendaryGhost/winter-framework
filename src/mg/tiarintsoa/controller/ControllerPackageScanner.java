@@ -16,29 +16,31 @@ public class ControllerPackageScanner {
 
     public static HashMap<String, Mapping> scan(String controllersPackage) throws ServletException {
         if (controllersPackage == null || controllersPackage.isEmpty()) {
-            throw new ServletException("The controllers_package parameter is empty. Please check your web.xml file.");
+            throw new ServletException("The controllers_package parameter is empty. Please check your web.xml file and add the \"controllers_package\" init variable.");
         }
 
         HashMap<String, Mapping> urlMappings = new HashMap<>();
         List<Class<?>> controllers = getAnnotatedControllers(controllersPackage);
         for (Class<?> controller : controllers) {
+            String controllerUrl = controller.isAnnotationPresent(UrlMapping.class) ? controller.getAnnotation(UrlMapping.class).value() : "";
             for (Method method : controller.getDeclaredMethods()) {
                 if (isEndPointMethod(method)) {
-                    String url = getMappedUrl(method);
+                    String methodUrl = getMappedUrl(method);
+                    String fullUrl = controllerUrl + methodUrl;
                     RequestVerb verb = getMappedVerb(method);
 
-                    Mapping mapping = urlMappings.get(url);
+                    Mapping mapping = urlMappings.get(fullUrl);
                     if(mapping == null) {
                         mapping = new Mapping(controller);
-                        urlMappings.put(url, mapping);
+                        urlMappings.put(fullUrl, mapping);
                     }
 
                     if (!mapping.getController().equals(controller)) {
-                        throw new ServletException("The URL \"" + url + "\" should not be mapped in 2 different controllers.");
+                        throw new ServletException("The URL \"" + fullUrl + "\" should not be mapped in 2 different controllers.");
                     }
 
                     try {
-                        mapping.addVerbMapping(verb, method, url);
+                        mapping.addVerbMapping(verb, method, fullUrl);
                         if (!mapping.isRestAPI(verb)) validateMethodReturnType(method, controller);
                     } catch (Exception e) {
                         throw new ServletException(e);
