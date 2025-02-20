@@ -29,148 +29,151 @@ public class FrontController extends HttpServlet {
 
     @Override
     public void init(ServletConfig config) throws ServletException {
-	super.init(config);
-	ROOT_DIRECTORY = config.getServletContext().getRealPath("/");
-	STATIC_DIRECTORY = ROOT_DIRECTORY + File.separator + STATIC_FOLDER_NAME + File.separator;
-	String controllersPackage = getInitParameter("controllers_package");
-	SESSION_AUTHENTICATED = getInitParameter("session_authenticated") != null
-		? getInitParameter("session_authenticated")
-		: "authenticated";
-	SESSION_ROLE = getInitParameter("session_role") != null ? getInitParameter("session_role") : "role";
-	urlMappings = ControllerPackageScanner.scan(controllersPackage);
+        super.init(config);
+        ROOT_DIRECTORY = config.getServletContext().getRealPath("/");
+        STATIC_DIRECTORY = ROOT_DIRECTORY + File.separator + STATIC_FOLDER_NAME + File.separator;
+        String controllersPackage = getInitParameter("controllers_package");
+        SESSION_AUTHENTICATED = getInitParameter("session_authenticated") != null
+                ? getInitParameter("session_authenticated")
+                : "authenticated";
+        SESSION_ROLE = getInitParameter("session_role") != null ? getInitParameter("session_role") : "role";
+        urlMappings = ControllerPackageScanner.scan(controllersPackage);
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
-	processRequest(req, resp, RequestVerb.GET);
+        processRequest(req, resp, RequestVerb.GET);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
-	processRequest(req, resp, RequestVerb.POST);
+        processRequest(req, resp, RequestVerb.POST);
     }
 
     protected void processRequest(HttpServletRequest req, HttpServletResponse resp, RequestVerb verb)
-	    throws IOException, ServletException {
-	// Get the part of the URL after the base URL of the webapp
-	String requestURI = req.getRequestURI();
-	String contextPath = req.getContextPath();
-	String url = requestURI.substring(contextPath.length());
+            throws IOException, ServletException {
+        // Get the part of the URL after the base URL of the webapp
+        String requestURI = req.getRequestURI();
+        String contextPath = req.getContextPath();
+        String url = requestURI.substring(contextPath.length());
 
-	// Handle static resources (files starting with "static/")
-	if (url.startsWith("/static/")) {
-	    serveStaticFile(req, resp, url);
-	    return;
-	}
+        // Handle static resources (files starting with "static/")
+        if (url.startsWith("/static/")) {
+            serveStaticFile(req, resp, url);
+            return;
+        }
 
-	// Proceed with normal mapping logic
-	Mapping mapping = urlMappings.get(url);
+        // Proceed with normal mapping logic
+        Mapping mapping = urlMappings.get(url);
 
-	if (mapping == null) {
-	    resp.sendError(HttpServletResponse.SC_NOT_FOUND,
-		    "The requested URL \"" + url + "\" was not found on this server.");
-	    return;
-	}
+        if (mapping == null) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND,
+                    "The requested URL \"" + url + "\" was not found on this server.");
+            return;
+        }
 
-	try {
-	    FieldErrors fieldErrors = new FieldErrors();
-	    Object responseObject = mapping.executeMethod(req, verb, url, fieldErrors);
-	    if (fieldErrors.hasErrors()) {
-		redirectToErrorUrl(req, resp, mapping.getErrorUrl(verb), fieldErrors);
-		return;
-	    }
+        try {
+            FieldErrors fieldErrors = new FieldErrors();
+            Object responseObject = mapping.executeMethod(req, verb, url, fieldErrors);
+            if (fieldErrors.hasErrors()) {
+                redirectToErrorUrl(req, resp, mapping.getErrorUrl(verb), fieldErrors);
+                return;
+            }
 
-	    if (mapping.isRestAPI(verb)) {
-		processRestRequest(resp, responseObject);
-	    } else {
-		processBasicRequest(req, resp, responseObject);
-	    }
-	} catch (VerbNotFoundException e) {
-	    resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-	} catch (UnauthorisedException e) {
-	    resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
-	} catch (Exception e) {
-	    throw new ServletException(e);
-	}
+            if (mapping.isRestAPI(verb)) {
+                processRestRequest(resp, responseObject);
+            } else {
+                processBasicRequest(req, resp, responseObject);
+            }
+        } catch (VerbNotFoundException e) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+        } catch (UnauthorisedException e) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+        } catch (Exception e) {
+            throw new ServletException(e);
+        }
     }
 
     protected void redirectToErrorUrl(HttpServletRequest req, HttpServletResponse resp, String errorUrl,
-	    FieldErrors fieldErrors) throws IOException, ServletException {
-	req.setAttribute("fieldErrors", fieldErrors);
-	HttpServletRequest wrappedRequest = new HttpServletRequestWrapper(req) {
-	    @Override
-	    public String getMethod() {
-		return "GET";
-	    }
-	};
-	RequestDispatcher dispatcher = req.getRequestDispatcher(errorUrl);
-	dispatcher.forward(wrappedRequest, resp);
+                                      FieldErrors fieldErrors) throws IOException, ServletException {
+        req.setAttribute("fieldErrors", fieldErrors);
+        HttpServletRequest wrappedRequest = new HttpServletRequestWrapper(req) {
+            @Override
+            public String getMethod() {
+                return "GET";
+            }
+        };
+        RequestDispatcher dispatcher = req.getRequestDispatcher(errorUrl);
+        dispatcher.forward(wrappedRequest, resp);
     }
 
     // Method to serve static files
     protected void serveStaticFile(HttpServletRequest req, HttpServletResponse resp, String url) throws IOException {
-	// Remove the "/static/" prefix to get the actual file path
-	String filePath = url.substring("/static/".length());
+        // Remove the "/static/" prefix to get the actual file path
+        String filePath = url.substring("/static/".length());
 
-	// Create a File object for the requested file
-	File file = new File(STATIC_DIRECTORY + URLDecoder.decode(filePath, StandardCharsets.UTF_8));
+        // Create a File object for the requested file
+        File file = new File(STATIC_DIRECTORY + URLDecoder.decode(filePath, StandardCharsets.UTF_8));
 
-	if (!file.exists() || file.isDirectory()) {
-	    resp.sendError(HttpServletResponse.SC_NOT_FOUND, "File not found: " + filePath);
-	    return;
-	}
+        if (!file.exists() || file.isDirectory()) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "File not found: " + filePath);
+            return;
+        }
 
-	// Set the content type based on the file extension
-	String mimeType = req.getServletContext().getMimeType(file.getName());
-	if (mimeType == null) {
-	    mimeType = "application/octet-stream"; // Default to binary if mime type is unknown
-	}
-	resp.setContentType(mimeType);
-	resp.setContentLengthLong(file.length());
+        // Set the content type based on the file extension
+        String mimeType = req.getServletContext().getMimeType(file.getName());
+        if (mimeType == null) {
+            mimeType = "application/octet-stream"; // Default to binary if mime type is unknown
+        }
+        resp.setContentType(mimeType);
+        resp.setContentLengthLong(file.length());
 
-	// Serve the file content
-	try (FileInputStream fileInputStream = new FileInputStream(file);
-		OutputStream outputStream = resp.getOutputStream()) {
-	    byte[] buffer = new byte[1024];
-	    int bytesRead;
-	    while ((bytesRead = fileInputStream.read(buffer)) != -1) {
-		outputStream.write(buffer, 0, bytesRead);
-	    }
-	}
+        // Serve the file content
+        try (FileInputStream fileInputStream = new FileInputStream(file);
+             OutputStream outputStream = resp.getOutputStream()) {
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+        }
     }
 
     protected void processBasicRequest(HttpServletRequest req, HttpServletResponse resp, Object responseObject)
-	    throws ServletException, IOException {
-	if (responseObject instanceof String responseString) {
-	    PrintWriter out = resp.getWriter();
-	    out.println("<main>" + responseString + "</main>");
-	} else if (responseObject instanceof ModelView modelView) {
-	    // Bind the attributes to the request
-	    HashMap<String, Object> data = modelView.getData();
-	    for (String key : data.keySet()) {
-		req.setAttribute(key, data.get(key));
-	    }
+            throws ServletException, IOException {
+        if (responseObject instanceof String responseString) {
+            resp.setContentType("text/html");
+            resp.setCharacterEncoding("UTF-8");
 
-	    // Forward the request to the view
-	    RequestDispatcher dispatcher = req.getRequestDispatcher(modelView.getUrl());
-	    dispatcher.forward(req, resp);
-	}
+            PrintWriter out = resp.getWriter();
+            out.println("<main>" + responseString + "</main>");
+        } else if (responseObject instanceof ModelView modelView) {
+            // Bind the attributes to the request
+            HashMap<String, Object> data = modelView.getData();
+            for (String key : data.keySet()) {
+                req.setAttribute(key, data.get(key));
+            }
+
+            // Forward the request to the view
+            RequestDispatcher dispatcher = req.getRequestDispatcher("/" + modelView.getUrl());
+            dispatcher.forward(req, resp);
+        }
     }
 
     protected void processRestRequest(HttpServletResponse resp, Object responseObject) throws IOException {
-	// Set the response type to JSON
-	resp.setContentType("application/json");
-	resp.setCharacterEncoding("UTF-8");
+        // Set the response type to JSON
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
 
-	PrintWriter out = resp.getWriter();
-	String jsonResponse;
+        PrintWriter out = resp.getWriter();
+        String jsonResponse;
 
-	if (responseObject instanceof ModelView modelView) {
-	    jsonResponse = gson.toJson(modelView.getData());
-	} else {
-	    jsonResponse = gson.toJson(responseObject);
-	}
+        if (responseObject instanceof ModelView modelView) {
+            jsonResponse = gson.toJson(modelView.getData());
+        } else {
+            jsonResponse = gson.toJson(responseObject);
+        }
 
-	out.println(jsonResponse);
+        out.println(jsonResponse);
     }
 }

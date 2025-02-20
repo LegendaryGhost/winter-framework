@@ -22,7 +22,7 @@ winter-framework for **Controllers**
     <!-- Servlet naming -->
     <servlet>
         <servlet-name>FrontController</servlet-name>
-        <servlet-class>com.tiarintsoa.FrontController</servlet-class>
+        <servlet-class>com.tiarintsoa.controller.FrontController</servlet-class>
         <init-param>
             <param-name>controllers_package</param-name>
             <param-value>com.example.controller</param-value>
@@ -418,6 +418,7 @@ import com.tiarintsoa.RestEndPoint;
 import com.tiarintsoa.ModelView;
 import mg.winter.entity.Employee;
 
+@Controller
 public class TestController {
 
     @UrlMapping("/")
@@ -586,7 +587,7 @@ within the xml configuration file like this:
     <!-- Servlet naming -->
     <servlet>
         <servlet-name>FrontController</servlet-name>
-        <servlet-class>com.tiarintsoa.FrontController</servlet-class>
+        <servlet-class>com.tiarintsoa.controller.FrontController</servlet-class>
         <init-param>
             <param-name>controllers_package</param-name>
             <param-value>com.example.controller</param-value>

@@ -30,7 +30,7 @@ public class ControllerPackageScanner {
                     RequestVerb verb = getMappedVerb(method);
 
                     Mapping mapping = urlMappings.get(fullUrl);
-                    if(mapping == null) {
+                    if (mapping == null) {
                         mapping = new Mapping(controller);
                         urlMappings.put(fullUrl, mapping);
                     }

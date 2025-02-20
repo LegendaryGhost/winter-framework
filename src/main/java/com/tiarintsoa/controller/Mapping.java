@@ -35,6 +35,10 @@ public class Mapping {
         return controller;
     }
 
+    public HashMap<RequestVerb, Method> getMethods() {
+        return methods;
+    }
+
     public void addVerbMapping(RequestVerb verb, Method method, String url) throws Exception {
         if (methods.containsKey(verb)) throw new Exception("The url and verb (" + url + ", " + verb + ") cannot be mapped more than one time");
         methods.put(verb, method);
