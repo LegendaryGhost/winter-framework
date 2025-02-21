@@ -83,7 +83,7 @@ public class FrontController extends HttpServlet {
             if (mapping.isRestAPI(verb)) {
                 processRestRequest(resp, responseObject);
             } else {
-                processBasicRequest(req, resp, responseObject);
+                processBasicRequest(req, resp, responseObject, contextPath);
             }
         } catch (VerbNotFoundException e) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
@@ -139,7 +139,7 @@ public class FrontController extends HttpServlet {
         }
     }
 
-    protected void processBasicRequest(HttpServletRequest req, HttpServletResponse resp, Object responseObject)
+    protected void processBasicRequest(HttpServletRequest req, HttpServletResponse resp, Object responseObject, String contextPath)
             throws ServletException, IOException {
         if (responseObject instanceof String responseString) {
             resp.setContentType("text/html");
@@ -148,15 +148,20 @@ public class FrontController extends HttpServlet {
             PrintWriter out = resp.getWriter();
             out.println("<main>" + responseString + "</main>");
         } else if (responseObject instanceof ModelView modelView) {
-            // Bind the attributes to the request
-            HashMap<String, Object> data = modelView.getData();
-            for (String key : data.keySet()) {
-                req.setAttribute(key, data.get(key));
-            }
+            String viewUrl = modelView.getUrl();
+            if (viewUrl.startsWith("redirect:")) {
+                resp.sendRedirect(contextPath + viewUrl.substring("redirect:".length()));
+            } else {
+                // Bind the attributes to the request
+                HashMap<String, Object> data = modelView.getData();
+                for (String key : data.keySet()) {
+                    req.setAttribute(key, data.get(key));
+                }
 
-            // Forward the request to the view
-            RequestDispatcher dispatcher = req.getRequestDispatcher("/" + modelView.getUrl());
-            dispatcher.forward(req, resp);
+                // Forward the request to the view
+                RequestDispatcher dispatcher = req.getRequestDispatcher("/" + modelView.getUrl());
+                dispatcher.forward(req, resp);
+            }
         }
     }
 
