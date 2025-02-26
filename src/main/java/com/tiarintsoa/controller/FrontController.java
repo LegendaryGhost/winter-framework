@@ -1,6 +1,7 @@
 package com.tiarintsoa.controller;
 
 import com.google.gson.Gson;
+import com.tiarintsoa.json.GsonDateTimeAdapters;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -23,7 +24,7 @@ import java.util.HashMap;
 public class FrontController extends HttpServlet {
 
     private HashMap<String, Mapping> urlMappings;
-    private final Gson gson = new Gson();
+    private final Gson gson = GsonDateTimeAdapters.buildGson();
     public static final String STATIC_FOLDER_NAME = "static";
     public static String ROOT_DIRECTORY, STATIC_DIRECTORY, SESSION_AUTHENTICATED, SESSION_ROLE;
 

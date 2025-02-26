@@ -18,6 +18,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
 public class Mapping {
@@ -74,6 +78,7 @@ public class Mapping {
     }
 
     private Object getValueFromParameterName(HttpServletRequest request, Class<?> parameterClass, String parameterName) throws Exception {
+        // Numbers casting
         if (parameterClass.equals(Integer.class) || parameterClass.equals(int.class)) {
             try {
                 return Integer.parseInt(request.getParameter(parameterName));
@@ -90,10 +95,25 @@ public class Mapping {
             }
         }
 
+        // Date casting
+        if (parameterClass.equals(LocalDate.class)) {
+            return LocalDate.parse(request.getParameter(parameterName), DateTimeFormatter.ISO_DATE);
+        }
+
+        if (parameterClass.equals(LocalTime.class)) {
+            return LocalTime.parse(request.getParameter(parameterName), DateTimeFormatter.ISO_TIME);
+        }
+
+        if (parameterClass.equals(LocalDateTime.class)) {
+            return LocalDateTime.parse(request.getParameter(parameterName), DateTimeFormatter.ISO_DATE_TIME);
+        }
+
+        // String handling
         if (parameterClass.equals(String.class)) {
             return request.getParameter(parameterName);
         }
 
+        // Object handling
         Object newValue = null;
         for(Field field: parameterClass.getDeclaredFields()) {
             Object parameterSubValue = null;
