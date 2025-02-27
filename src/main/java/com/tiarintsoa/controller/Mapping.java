@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 
 public class Mapping {
@@ -78,10 +79,12 @@ public class Mapping {
     }
 
     private Object getValueFromParameterName(HttpServletRequest request, Class<?> parameterClass, String parameterName) throws Exception {
+        String parameterStringValue = request.getParameter(parameterName);
+
         // Numbers casting
         if (parameterClass.equals(Integer.class) || parameterClass.equals(int.class)) {
             try {
-                return Integer.parseInt(request.getParameter(parameterName));
+                return Integer.parseInt(parameterStringValue);
             } catch (NumberFormatException e) {
                 return null;
             }
@@ -89,7 +92,7 @@ public class Mapping {
 
         if (parameterClass.equals(Double.class) || parameterClass.equals(double.class)) {
             try {
-                return Double.parseDouble(request.getParameter(parameterName));
+                return Double.parseDouble(parameterStringValue);
             } catch (NumberFormatException e) {
                 return null;
             }
@@ -97,20 +100,32 @@ public class Mapping {
 
         // Date casting
         if (parameterClass.equals(LocalDate.class)) {
-            return LocalDate.parse(request.getParameter(parameterName), DateTimeFormatter.ISO_DATE);
+            try {
+                return LocalDate.parse(parameterStringValue, DateTimeFormatter.ISO_DATE);
+            } catch (NullPointerException | DateTimeParseException e) {
+                return null;
+            }
         }
 
         if (parameterClass.equals(LocalTime.class)) {
-            return LocalTime.parse(request.getParameter(parameterName), DateTimeFormatter.ISO_TIME);
+            try {
+                return LocalTime.parse(parameterStringValue, DateTimeFormatter.ISO_TIME);
+            } catch (NullPointerException | DateTimeParseException e) {
+                return null;
+            }
         }
 
         if (parameterClass.equals(LocalDateTime.class)) {
-            return LocalDateTime.parse(request.getParameter(parameterName), DateTimeFormatter.ISO_DATE_TIME);
+            try {
+                return LocalDateTime.parse(parameterStringValue, DateTimeFormatter.ISO_DATE_TIME);
+            } catch (NullPointerException | DateTimeParseException e) {
+                return null;
+            }
         }
 
         // String handling
         if (parameterClass.equals(String.class)) {
-            return request.getParameter(parameterName);
+            return parameterStringValue;
         }
 
         // Object handling

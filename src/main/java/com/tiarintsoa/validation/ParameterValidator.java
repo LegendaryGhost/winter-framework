@@ -22,9 +22,8 @@ public class ParameterValidator {
         checkValidationAnnotations(parameter, parameterName, value, fieldErrors);
 
         Class<?> parameterClass = parameter.getType();
-        if (parameterClass.equals(String.class)) {
-            return;
-        }
+        // Prevents validations to occur on string or null objects
+        if (parameterClass.equals(String.class) || value == null) return;
 
         for (Field field : parameterClass.getDeclaredFields()) {
             field.setAccessible(true);
