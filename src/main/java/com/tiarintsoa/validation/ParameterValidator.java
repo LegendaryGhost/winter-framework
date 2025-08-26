@@ -10,6 +10,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public class ParameterValidator {
 
@@ -24,6 +25,12 @@ public class ParameterValidator {
         Class<?> parameterClass = parameter.getType();
         // Prevents validations to occur on string or null objects
         if (parameterClass.equals(String.class) || value == null) return;
+
+        // Prevents validations to occur on date, time and datetime objects
+        if (parameterClass.equals(LocalDate.class) ||
+                parameterClass.equals(java.time.LocalTime.class) ||
+                parameterClass.equals(java.time.LocalDateTime.class)
+        ) return;
 
         for (Field field : parameterClass.getDeclaredFields()) {
             field.setAccessible(true);
@@ -62,11 +69,13 @@ public class ParameterValidator {
 
         if (value.getClass().equals(String.class)) {
             int stringLength = ((String) value).length();
-            if (stringLength < annotation.min() || stringLength > annotation.max()) fieldErrors.addFieldError(fieldName, annotation.message());
+            if (stringLength < annotation.min() || stringLength > annotation.max())
+                fieldErrors.addFieldError(fieldName, annotation.message());
         } else if (isValidNumber(value.toString())) {
             BigDecimal number = new BigDecimal(value.toString());
             double doubleValue = number.doubleValue();
-            if (doubleValue < annotation.min() || doubleValue > annotation.max()) fieldErrors.addFieldError(fieldName, annotation.message());
+            if (doubleValue < annotation.min() || doubleValue > annotation.max())
+                fieldErrors.addFieldError(fieldName, annotation.message());
         }
     }
 
@@ -91,7 +100,7 @@ public class ParameterValidator {
             fieldErrors.addFieldError(fieldName, annotation.message());
             return;
         }
-        if(!isValidNumber(value.toString())) {
+        if (!isValidNumber(value.toString())) {
             fieldErrors.addFieldError(fieldName, annotation.message());
         }
     }
